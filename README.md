@@ -1,6 +1,6 @@
 # Compilador de C -> Assembly
 
-Este documento descreve as especificações do subconjunto da linguagem C que será aceito pelo nosso compilador, cujo objetivo final é a tradução para código Assembly. O documento também possui os testes realizados até o momento atual. No versionamento atual encontra-se implementado o analizador lexico (a principio completo, porem pode sofrer revisões) e o analisador sintatico completo
+Este documento descreve as especificações do subconjunto da linguagem C que será aceito pelo nosso compilador, cujo objetivo final é a tradução para código Assembly. O documento também apresenta os testes realizados até o momento atual. No versionamento vigente encontram-se implementados o analizador léxico (a princípio completo, mas sujeito a revisões) e o analisador sintático completo.
 
 ---
 
@@ -52,9 +52,9 @@ Este documento descreve as especificações do subconjunto da linguagem C que se
 
 ---
 
-# Tecnologias Utilizadas
+# Ferramentas Utilizadas
 
-| Tecnologia | Utilização |
+| Ferramentas | Função |
 |------------|------------|
 | C | Linguagem principal do compilador |
 | Assembly | Linguagem final do compilador |
@@ -70,7 +70,7 @@ Este documento descreve as especificações do subconjunto da linguagem C que se
 
 ## 1. Elementos Léxicos (Tokens)
 
-Nossa linguagem reconhece as seguintes categorias de tokens:
+A linguagem escolhida reconhece as seguintes categorias de tokens:
 
 ### 1.1. Palavras Reservadas (Keywords)
 As seguintes palavras são reservadas e não podem ser usadas como identificadores:
@@ -78,7 +78,7 @@ As seguintes palavras são reservadas e não podem ser usadas como identificador
 
 ### 1.2. Identificadores
 Nomes de variáveis e funções. 
-* **Regra:** Devem começar com uma letra (a-z, A-Z) ou sublinhado (`_`), seguidos por zero ou mais letras, dígitos (0-9) ou sublinhados.
+* **Regra:** Devem começar com uma letra (a-z, A-Z) ou underline (`_`), seguidos por zero ou mais letras, dígitos (0-9) e/ou underline.
 
 ### 1.3. Literais
 * **Inteiros:** Sequência de um ou mais dígitos de `0` a `9`.
@@ -86,7 +86,7 @@ Nomes de variáveis e funções.
 
 ### 1.4. Operadores e Símbolos Especiais
 | Categoria | Símbolos |
-| :--- | :--- |
+| --- | --- |
 | Aritméticos | `+`, `-`, `*`, `/` |
 | Relacionais | `==`, `!=`, `<`, `>`, `<=`, `>=` |
 | Atribuição | `=` |
@@ -141,7 +141,7 @@ int main() {
 
 ## Pré-requisitos
 
-Antes de iniciar, certifique-se de possuir instalado: 
+Antes de iniciar, certifique-se de possuir instalados: 
 
 Bison, Flex, GCC, WSL(caso use Windows)/Linux 
 
