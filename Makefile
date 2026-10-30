@@ -6,7 +6,7 @@ BISON_H = parser.tab.h
 FLEX_C  = lex.yy.c
 
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -I.
 
 all: $(EXEC)
 
@@ -19,5 +19,15 @@ $(BISON_C) $(BISON_H): $(BISON_FILE)
 $(FLEX_C): $(FLEX_FILE) $(BISON_H)
 	flex $(FLEX_FILE)
 
+test-symtab: symtab.c testes/test_symtab.c
+	$(CC) $(CFLAGS) symtab.c testes/test_symtab.c -o testes/test_symtab
+	./testes/test_symtab
+
+test-ast: ast.c testes/test_ast.c
+	$(CC) $(CFLAGS) ast.c testes/test_ast.c -o testes/test_ast
+	./testes/test_ast
+
+test: test-symtab test-ast
+
 clean:
-	rm -f $(EXEC) $(BISON_C) $(BISON_H) $(FLEX_C)
+	rm -f $(EXEC) $(BISON_C) $(BISON_H) $(FLEX_C) testes/test_symtab testes/test_ast
