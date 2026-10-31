@@ -1,0 +1,13 @@
+// Comentario de linha ignorado
+
+int char bool float void
+if else for while return
+
+"string literal normal"
+"string literal com escapes \n \t"
+
+12345
+variavel_teste
+
++ - * / %
+( ) [ ] ; = ,

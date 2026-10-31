@@ -28,7 +28,7 @@ ASTNode *ast_root = NULL;
 %token INT CHAR BOOL FLOAT VOID
 
 %type <node> program stmt expr_stmt decl_stmt assign_stmt expr 
-%type <node> func_decl param_list param args_list 
+%type <node> func_decl param_list param args_list block_stmt
 %type <data_type> type
 
 %nonassoc LOWER_THAN_ELSE
@@ -53,6 +53,7 @@ stmt:
       expr_stmt   { $$ = $1; }
     | decl_stmt   { $$ = $1; }
     | assign_stmt { $$ = $1; }
+    | func_decl   { $$ = $1; }
     | IF LPAREN expr RPAREN stmt %prec LOWER_THAN_ELSE { 
         $$ = ast_new_if($3, $5); 
     }

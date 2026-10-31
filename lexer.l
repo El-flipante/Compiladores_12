@@ -1,8 +1,11 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "symtab.h"
 #include "parser.tab.h"
 %}
+
+%option nounput noinput
 
 digit [0-9]
 letter [a-zA-Z]
