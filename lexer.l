@@ -1,8 +1,11 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "symtab.h"
 #include "parser.tab.h"
 %}
+
+%option nounput noinput
 
 digit [0-9]
 letter [a-zA-Z]
@@ -24,6 +27,11 @@ id ({letter}|{under})({letter}|{digit}|{under})*
 "float" { return FLOAT; }
 "void" { return VOID; }
 
+\"([^\"\\]|\\.)*\"  { 
+    yylval.id = strdup(yytext); 
+    return STRING_LITERAL; 
+}
+
 {number}{letter}+       { printf("'%s' eh invalido\n", yytext); exit(1); }
 {number}          { yylval.intval = atoi(yytext); return NUM; }
 {id}            { yylval.id = strdup(yytext); return ID; }
@@ -38,6 +46,10 @@ id ({letter}|{under})({letter}|{digit}|{under})*
 "["	    { return LBRACK; }
 "]"	    { return RBRACK; }
 "="	    { return ASSIGN; }
+","        { return COMMA; }
+
+"//".*
+"/*"([^*]|\*+[^*/])*\*+"/"
 
 [ \t\n\r]+  { }
 
