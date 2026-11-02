@@ -10,4 +10,4 @@ if else for while return
 variavel_teste
 
 + - * / %
-( ) [ ] ; = ,
+( ) [ ] { } ; = ,
