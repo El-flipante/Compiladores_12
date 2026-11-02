@@ -78,6 +78,7 @@ typedef struct ASTNode {
             struct ASTNode *expr;
             struct ASTNode *next;
         } args_list;
+
     };
 } ASTNode;
 
@@ -101,6 +102,7 @@ ASTNode* ast_new_func_call(const char *id, ASTNode *args);
 ASTNode* ast_new_param(const char *id, DataType type);
 ASTNode* ast_new_param_list(ASTNode *param_list, ASTNode *param);
 ASTNode* ast_new_args_list(ASTNode *args_list, ASTNode *expr);
+ASTNode* ast_new_return(ASTNode *expr);
 
 // Funcoes utilitarias originais
 void ast_print(ASTNode *node, int level);
