@@ -1,14 +1,16 @@
-int soma(int a, int b) [
+int soma(int a, int b) {
     return a + b;
-]
+}
 
-int x = 10
-int y = 20;
+int x;
+int y;
+x = 10;
+y = 20;
 
-if (x) [
+if (x) {
     y = 30;
-] else [
+} else {
     y = 40;
-]
+}
 
 soma(x, y);
