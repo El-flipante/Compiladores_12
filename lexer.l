@@ -45,6 +45,8 @@ id ({letter}|{under})({letter}|{digit}|{under})*
 ";"         { return SEMI; }
 "["	    { return LBRACK; }
 "]"	    { return RBRACK; }
+"{"        { return LBRACE; }
+"}"        { return RBRACE; }	    
 "="	    { return ASSIGN; }
 ","        { return COMMA; }
 

@@ -119,6 +119,15 @@ ASTNode* ast_new_args_list(ASTNode *args_list, ASTNode *expr) {
     return node;
 }
 
+ASTNode* ast_new_return(ASTNode *expr) {
+    ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
+    if (node != NULL) {
+        node->type = AST_RETURN;
+        node->return_stmt.expr = expr;
+    }
+    return node;
+}
+
 // IMPRESSAO DA ARVORE
 
 void ast_print(ASTNode *node, int level) {
@@ -184,6 +193,10 @@ void ast_print(ASTNode *node, int level) {
         case AST_ARGS_LIST:
             ast_print(node->args_list.next, level);
             ast_print(node->args_list.expr, level);
+            break;
+	case AST_RETURN:
+            printf("RETURN\n");
+            ast_print(node->return_stmt.expr, level + 1);
             break;
 
         default: printf("Node Indefinido (%d)\n", node->type);

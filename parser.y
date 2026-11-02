@@ -23,7 +23,7 @@ ASTNode *ast_root = NULL;
 %token <id> ID
 %token <id> STRING_LITERAL
 %token PLUS MINUS TIMES DIVIDE MOD
-%token LPAREN RPAREN LBRACK RBRACK SEMI ASSIGN COMMA
+%token LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE SEMI ASSIGN COMMA
 %token IF ELSE FOR WHILE RETURN
 %token INT CHAR BOOL FLOAT VOID
 
@@ -54,6 +54,8 @@ stmt:
     | decl_stmt   { $$ = $1; }
     | assign_stmt { $$ = $1; }
     | func_decl   { $$ = $1; }
+    | block_stmt  { $$ = $1; }
+    | RETURN expr SEMI { $$ = ast_new_return($2); }
     | IF LPAREN expr RPAREN stmt %prec LOWER_THAN_ELSE { 
         $$ = ast_new_if($3, $5); 
     }
@@ -150,7 +152,7 @@ args_list:
     ;
 
 block_stmt:
-      LBRACK program RBRACK  { $$ = $2; }
+      LBRACE program RBRACE  { $$ = $2; }
     ;
 
 %%
