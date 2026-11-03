@@ -1,6 +1,8 @@
 #ifndef SYMTAB_H
 #define SYMTAB_H
 
+#define MAX_PARAMS 12
+
 typedef enum {
     TYPE_INT,
     TYPE_CHAR,
