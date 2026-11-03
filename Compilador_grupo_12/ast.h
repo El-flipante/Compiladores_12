@@ -4,7 +4,7 @@
 
 typedef enum {
     AST_NUM, AST_ID, AST_BINOP, AST_ASSIGN,
-    AST_DECL, AST_SEQ, AST_IF, AST_WHILE, AST_RETURN,
+    AST_DECL, AST_SEQ, AST_IF, AST_WHILE, AST_FOR, AST_RETURN,
     AST_FUNC_DECL, AST_FUNC_CALL, AST_PARAM, AST_PARAM_LIST, AST_ARGS_LIST
 } ASTNodeType;
 
@@ -49,6 +49,13 @@ typedef struct ASTNode {
         } while_stmt;
 
         struct {
+            struct ASTNode *init;
+            struct ASTNode *cond;
+            struct ASTNode *inc;
+            struct ASTNode *body;
+        } for_stmt;
+
+        struct {
             struct ASTNode *expr;
         } return_stmt;
 
@@ -78,7 +85,6 @@ typedef struct ASTNode {
             struct ASTNode *expr;
             struct ASTNode *next;
         } args_list;
-
     };
 } ASTNode;
 
@@ -94,6 +100,7 @@ ASTNode* ast_new_seq(ASTNode *stmt1, ASTNode *stmt2);
 ASTNode* ast_new_if(ASTNode *cond, ASTNode *if_branch);
 ASTNode* ast_new_if_else(ASTNode *cond, ASTNode *if_branch, ASTNode *else_branch);
 ASTNode* ast_new_while(ASTNode *cond, ASTNode *body);
+ASTNode* ast_new_for(ASTNode *init, ASTNode *cond, ASTNode *inc, ASTNode *body);
 ASTNode* ast_new_return(ASTNode *expr);
 
 // Construtores (Funcoes)
@@ -102,9 +109,8 @@ ASTNode* ast_new_func_call(const char *id, ASTNode *args);
 ASTNode* ast_new_param(const char *id, DataType type);
 ASTNode* ast_new_param_list(ASTNode *param_list, ASTNode *param);
 ASTNode* ast_new_args_list(ASTNode *args_list, ASTNode *expr);
-ASTNode* ast_new_return(ASTNode *expr);
 
-// Funcoes utilitarias originais
+// Funcoes utilitarias
 void ast_print(ASTNode *node, int level);
 void ast_free(ASTNode *node);
 
