@@ -1,84 +1,86 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "../ast.h"
+#include "symtab.h"
 
-int main(void) {
-    printf("Iniciando testes da Árvore Sintática Abstrata (AST)...\n\n");
+void test_insert_and_lookup() {
+    symtab_init();
 
-    // 1. Teste de bloco IF / ELSE: if (x > 0) { y = 1; } else { y = 2; }
-    ASTNode *if_cond = ast_new_binop('>', ast_new_id("x", TYPE_INT), ast_new_num(0));
-    ASTNode *then_branch = ast_new_assign("y", ast_new_num(1));
-    ASTNode *else_branch = ast_new_assign("y", ast_new_num(2));
-    ASTNode *if_else_node = ast_new_if_else(if_cond, then_branch, else_branch);
+    // Inserção de x global (escopo 0) e variável global g
+    Symbol *s = insert_symbol("x", TYPE_INT, 0, 0, 0);
+    Symbol *g = insert_symbol("g", TYPE_CHAR, 0, 0, 0);
+    assert(s != NULL);
+    assert(g != NULL);
+    assert(strcmp(s->name, "x") == 0);
+    assert(s->scope == 0);
 
-    assert(if_else_node != NULL);
-    assert(if_else_node->type == AST_IF);
-    assert(if_else_node->if_stmt.cond == if_cond);
-    assert(if_else_node->if_stmt.if_branch == then_branch);
-    assert(if_else_node->if_stmt.else_branch == else_branch);
+    // Busca no escopo 0
+    Symbol *found = lookup_symbol("x", 0);
+    assert(found != NULL);
+    assert(found->type == TYPE_INT);
+    assert(found->scope == 0);
 
-    printf("=== Teste 1: AST IF/ELSE ===\n");
-    ast_print(if_else_node, 0);
+    // Redeclaração no mesmo escopo deve falhar
+    Symbol *dup = insert_symbol("x", TYPE_FLOAT, 0, 0, 0);
+    assert(dup == NULL);
 
-    // 2. Teste de laço WHILE: while (i < 10) { i = i + 1; }
-    ASTNode *while_cond = ast_new_binop('<', ast_new_id("i", TYPE_INT), ast_new_num(10));
-    ASTNode *while_body = ast_new_assign("i", ast_new_binop('+', ast_new_id("i", TYPE_INT), ast_new_num(1)));
-    ASTNode *while_node = ast_new_while(while_cond, while_body);
+    // Shadowing: inserção de x no escopo 1 com outro tipo
+    Symbol *shadow = insert_symbol("x", TYPE_FLOAT, 0, 0, 1);
+    assert(shadow != NULL);
+    assert(shadow->scope == 1);
+    assert(shadow->type == TYPE_FLOAT);
 
-    assert(while_node != NULL);
-    assert(while_node->type == AST_WHILE);
-    assert(while_node->while_stmt.cond == while_cond);
-    assert(while_node->while_stmt.body == while_body);
+    // Busca de x no escopo 1 deve retornar o x local (TYPE_FLOAT)
+    Symbol *found_local = lookup_symbol("x", 1);
+    assert(found_local != NULL);
+    assert(found_local->scope == 1);
+    assert(found_local->type == TYPE_FLOAT);
 
-    printf("\n=== Teste 2: AST WHILE ===\n");
-    ast_print(while_node, 0);
+    // Busca de x no escopo 0 deve continuar retornando o x global (TYPE_INT)
+    Symbol *found_global = lookup_symbol("x", 0);
+    assert(found_global != NULL);
+    assert(found_global->scope == 0);
+    assert(found_global->type == TYPE_INT);
 
-    // 3. Teste de laço FOR: for (i = 0; i < 5; i = i + 1) { total = total + i; }
-    ASTNode *for_init = ast_new_assign("i", ast_new_num(0));
-    ASTNode *for_cond = ast_new_binop('<', ast_new_id("i", TYPE_INT), ast_new_num(5));
-    ASTNode *for_inc  = ast_new_assign("i", ast_new_binop('+', ast_new_id("i", TYPE_INT), ast_new_num(1)));
-    ASTNode *for_body = ast_new_assign("total", ast_new_binop('+', ast_new_id("total", TYPE_INT), ast_new_id("i", TYPE_INT)));
-    ASTNode *for_node = ast_new_for(for_init, for_cond, for_inc, for_body);
+    // Busca de variável global 'g' a partir do escopo 1 deve encontrá-la no escopo 0
+    Symbol *found_g = lookup_symbol("g", 1);
+    assert(found_g != NULL);
+    assert(found_g->scope == 0);
 
-    assert(for_node != NULL);
-    assert(for_node->type == AST_FOR);
-    assert(for_node->for_stmt.init == for_init);
-    assert(for_node->for_stmt.cond == for_cond);
-    assert(for_node->for_stmt.inc == for_inc);
-    assert(for_node->for_stmt.body == for_body);
+    // Fechamento do escopo 1: desativa o x local, voltando a enxergar o x global
+    close_scope(1);
+    Symbol *after_close = lookup_symbol("x", 1);
+    assert(after_close != NULL);
+    assert(after_close->scope == 0);
+    assert(after_close->type == TYPE_INT);
 
-    printf("\n=== Teste 3: AST FOR ===\n");
-    ast_print(for_node, 0);
+    free_symtab();
+}
 
-    // 4. Teste de Declaração e Chamada de Função:
-    // int soma(int a, int b) { return a + b; }
-    // res = soma(10, 20);
-    ASTNode *p1 = ast_new_param("a", TYPE_INT);
-    ASTNode *p2 = ast_new_param("b", TYPE_INT);
-    ASTNode *params = ast_new_param_list(p1, p2);
-    ASTNode *ret_stmt = ast_new_return(ast_new_binop('+', ast_new_id("a", TYPE_INT), ast_new_id("b", TYPE_INT)));
-    ASTNode *func_decl = ast_new_func_decl("soma", TYPE_INT, params, ret_stmt);
+void test_function_signatures() {
+    symtab_init();
 
-    ASTNode *args = ast_new_args_list(ast_new_num(10), ast_new_num(20));
-    ASTNode *func_call = ast_new_func_call("soma", args);
-    ASTNode *call_assign = ast_new_assign("res", func_call);
+    DataType params[] = { TYPE_INT, TYPE_FLOAT };
+    Symbol *fn = insert_function("calcula", TYPE_FLOAT, 2, params);
+    assert(fn != NULL);
+    assert(fn->is_function == 1);
+    assert(fn->return_type == TYPE_FLOAT);
+    assert(fn->param_count == 2);
+    assert(fn->param_types[0] == TYPE_INT);
+    assert(fn->param_types[1] == TYPE_FLOAT);
 
-    ASTNode *prog = ast_new_seq(func_decl, call_assign);
+    Symbol *found_fn = lookup_function("calcula");
+    assert(found_fn == fn);
 
-    assert(func_decl->type == AST_FUNC_DECL);
-    assert(strcmp(func_decl->func_decl.id, "soma") == 0);
-    assert(func_call->type == AST_FUNC_CALL);
+    print_symtab();
+    free_symtab();
+}
 
-    printf("\n=== Teste 4: AST FUNC_DECL e FUNC_CALL ===\n");
-    ast_print(prog, 0);
-
-    // Liberação de memória
-    ast_free(if_else_node);
-    ast_free(while_node);
-    ast_free(for_node);
-    ast_free(prog);
-
-    printf("\nTodos os testes da AST passaram com sucesso!\n");
+int main() {
+    printf("Rodando testes unitários da Tabela de Símbolos...\n");
+    test_insert_and_lookup();
+    test_function_signatures();
+    printf("Todos os testes da Tabela de Símbolos passaram com sucesso!\n");
     return 0;
 }

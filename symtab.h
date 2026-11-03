@@ -33,11 +33,11 @@ Symbol* insert_symbol(const char *name, DataType type, int is_array, int array_s
 Symbol* lookup_symbol_in_scope(const char *name, int scope);
 Symbol* lookup_symbol(const char *name, int scope);
 Symbol* lookup_symbol_global(const char *name);
-void close_escope(int scope);
-void clear_scope(int_scope);
+void close_scope(int scope);
+void clear_scope(int scope);
+int add_function_param(Symbol *func_sym, DataType param_type);
 
 Symbol* insert_function(const char *name, DataType return_type, int param_count, const DataType *param_types);
-int add_funciton_param(Symbol *func_sym, DataType param_type);
 Symbol* lookup_function(const char *name);
 
 const char* datatype_to_str(DataType type);
