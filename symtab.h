@@ -16,15 +16,29 @@ typedef struct Symbol {
     int is_array;
     int array_size;
     int scope;
+    int is_active;        // 1 = ativo no escopo, 0 = desativado
+    int is_function;      // 1 = função, 0 = variável/parâmetro
+    DataType return_type; // Tipo de retorno da função
+    int param_count;      // Número de parâmetros da função
+    DataType param_types[MAX_PARAMS];  //Tipos de parâmetros
     struct Symbol *next;
 } Symbol;
 
 // Funções da Tabela de Símbolos
 void symtab_init(void);
+void free_symtab(void);
 Symbol* insert_symbol(const char *name, DataType type, int is_array, int array_size, int scope);
+Symbol* lookup_symbol_in_scope(const char *name, int scope);
 Symbol* lookup_symbol(const char *name, int scope);
 Symbol* lookup_symbol_global(const char *name);
+void close_escope(int scope);
+void clear_scope(int_scope);
+
+Symbol* insert_function(const char *name, DataType return_type, int param_count, const DataType *param_types);
+int add_funciton_param(Symbol *func_sym, DataType param_type);
+Symbol* lookup_function(const char *name);
+
+const char* datatype_to_str(DataType type);
 void print_symtab(void);
-void free_symtab(void);
 
 #endif
