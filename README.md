@@ -156,57 +156,51 @@ int main() {
 
 # Como Executar o Projeto
 
-## Pré-requisitos
-
 Antes de iniciar, certifique-se de possuir instalados: 
-
-Bison, Flex, GCC, WSL(caso use Windows)/Linux 
-
-
+* **Bison** e **Flex** (para geração dos analisadores léxico e sintático)
+* **GCC** (Compilador C)
+* **Make** (Ferramenta de automação de compilação)
+* **WSL** (caso use Windows) ou ambiente **Linux**[cite: 8]
 
 ---
 
-## 1. Clonar o Repositório
+## 1. Clonar o Repositório e Acessar o Diretório
 
 ```bash
 git clone https://github.com/El-flipante/Compiladores_12
-
-cd Compiladores_12
+cd Compiladores_12/Compilador_grupo_12
 ```
 
----
+## 2. Compilar o Projeto
+O projeto agora conta com um Makefile para gerir todas as dependências automaticamente. Para compilar o analisador léxico, sintático, a AST e a Tabela de Símbolos, basta executar na raiz do código:
+```Bash
+make
+```
+(Dica: Caso queira limpar os ficheiros gerados em compilações anteriores, utilize o comando make clean).
 
-## 2. Compilar o analizador léxico
+## 3. Executar o Compilador
+Após a compilação, será gerado um executável. Para executá-lo passando um ficheiro de teste como entrada, utilize o redirecionamento do terminal:
 
-```bash
-flex lexer.l
+```Bash
+./parser < testes/teste_sintatico.txt
 ```
 
----
-
-## 3. Compilar o analizador sintático
-
-```bash
-bison -d parser.y
-```
-## 4. Compilar tudo
-
-```bash
-gcc -o compilador parser.tab.c lexer.yy.c -lfl
-```
----
-## 5. Executar o compilador
-``` bash
-./compilador
-```
 ## Estrutura do Projeto
-
-```text
-.Compiladores_12
-├── Professor
-├── README.md
-├── parser.y
-├── lexer.l
+Abaixo está a organização atualizada dos diretórios e ficheiros do projeto:
+```Plaintext
+Compiladores_12/
+├── Compilador_grupo_12/
+│   ├── testes/         # Scripts de teste (.sh) e ficheiros de texto para validação
+│   ├── ast.c           # Implementação da Árvore Sintática Abstrata
+│   ├── ast.h           # Cabeçalhos da Árvore Sintática Abstrata
+│   ├── lexer.l         # Regras de análise léxica (Flex)
+│   ├── Makefile        # Script de automação para compilação
+│   ├── parser.y        # Regras gramaticais e sintáticas (Bison)
+│   ├── symtab.c        # Implementação da Tabela de Símbolos e analisador semântico
+│   └── symtab.h        # Cabeçalhos da Tabela de Símbolos
+├── docs/               # Documentação detalhada, guia de testes e evidências visuais
+├── professor/          # Material e referências da disciplina
+└── README.md           # Este ficheiro
 ```
 
 # Licença
