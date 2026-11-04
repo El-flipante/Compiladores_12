@@ -110,10 +110,41 @@ type:
 
 // REGRAS DE EXPRESSAO UNIFICADAS
 expr:
-      expr PLUS expr      { $$ = ast_new_binop(PLUS, $1, $3); }
-    | expr MINUS expr     { $$ = ast_new_binop(MINUS, $1, $3); }
-    | expr TIMES expr     { $$ = ast_new_binop(TIMES, $1, $3); }
-    | expr DIVIDE expr    { $$ = ast_new_binop(DIVIDE, $1, $3); }
+      expr PLUS expr      { if ($1->expr_type =! $3->expr_type) 
+      {fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na soma!\n",);
+      $$ = ast_new_binop(PLUS, $1, $3);
+      $$->expr_type = TYPE_UNKNOWN;
+      } else {
+      $$ = ast_new_binop(PLUS, $1, $3);
+      $$->expr_type = $1->expr_type;}
+    }
+    | expr MINUS expr     { if ($1->expr_type =! $3->expr_type)
+    {fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na subtração!\n");
+    $$ = ast_new_binop(MINUS, $1, $3);
+    $$->expr_type = TYPE_UNKNOWN;
+    } else{ 
+    $$ = ast_new_binop(MINUS, $1, $3); 
+    $$->expr_type = $1->expr_type
+        }
+    }
+    | expr TIMES expr     { if ($1->expr_type =! $3->expr_type){
+    fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na multiplicação!\n");
+    $$ = ast_new_binop(TIMES, $1, $3);
+    $$->expr_type = TYPE_UNKNOWN;
+    }else{ 
+    $$ = ast_new_binop(TIMES, $1, $3);
+    $$->expr_type = $1->expr_type 
+        }
+    }
+    | expr DIVIDE expr    { if ($1->expr_type =! $3->expr_type){ 
+    fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na divisão!\n");
+    $$ = ast_new_binop(DIVIDE, $1, $3);
+    $$->expr_type = TYPE_UNKNOWN;
+    }else{
+    $$ = ast_new_binop(DIVIDE, $1, $3); 
+    $$->expr_type = $1->expr_type
+        }
+    }
     | LPAREN expr RPAREN  { $$ = $2; }
     | NUM                 { $$ = ast_new_num($1); }
     | ID                  { 
