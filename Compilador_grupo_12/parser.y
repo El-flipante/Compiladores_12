@@ -102,6 +102,28 @@ assign_stmt:
     }
     ;
 
+assign_stmt:
+      ID LBRANCK expr RBRACK ASSIGN expr SEMI {
+        Symbol *s = lookup_symbol_global($1);
+        if (!s) {
+            fprintf(stderr, "[ERRO SEMANTICO] Atribuicao: Variavel '%s' nao foi declarada!\n", $1);
+        } else if (s->type != $3->expr_type) {
+            fprintf(stderr, "[ERRO SEMANTICO] A variavel '%s' deve ser um inteiro\n", $1);
+        }
+	
+	if ($3->expr_type != TYPE_INT) {
+	    fprintf(stderr, "[ERRO SEMANTICO] O indice de vetor '%s' deve ser um inteiro\n", $1);
+	}
+
+	if (s && s->type != $6->expr_type) {
+	    fprintf(stderr, "[ERRO SEMANTICO] Tipo incompatível ao atribuir em '%s' \n", $1);
+	}
+
+	$$ = ast_new_array_assign($1, $3, $6);
+	free($1);	
+    }
+    ;
+
 type:
       INT   { $$ = TYPE_INT; }
     | CHAR  { $$ = TYPE_CHAR; }
@@ -118,6 +140,7 @@ expr:
       $$ = ast_new_binop(PLUS, $1, $3);
       $$->expr_type = $1->expr_type;}
     }
+
     | expr MINUS expr     { if ($1->expr_type =! $3->expr_type)
     {fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na subtração!\n");
     $$ = ast_new_binop(MINUS, $1, $3);
@@ -127,6 +150,7 @@ expr:
     $$->expr_type = $1->expr_type
         }
     }
+
     | expr TIMES expr     { if ($1->expr_type =! $3->expr_type){
     fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na multiplicação!\n");
     $$ = ast_new_binop(TIMES, $1, $3);
@@ -136,6 +160,7 @@ expr:
     $$->expr_type = $1->expr_type 
         }
     }
+
     | expr DIVIDE expr    { if ($1->expr_type =! $3->expr_type){ 
     fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na divisão!\n");
     $$ = ast_new_binop(DIVIDE, $1, $3);
@@ -145,6 +170,7 @@ expr:
     $$->expr_type = $1->expr_type
         }
     }
+
     | LPAREN expr RPAREN  { $$ = $2; }
     | NUM                 { $$ = ast_new_num($1); }
     | ID                  { 
@@ -186,6 +212,41 @@ block_stmt:
       LBRACE program RBRACE  { $$ = $2; }
     ;
 
+if_stmt:
+      IF LPAREN expr RPAREN stmt {
+	if ($3->expr_type != TYPE_BOOL && $3->expr_type != TYPE_INT){
+	   fprintf(stderr, "[ERRO SEMANTICO] A condição do if deve ser booleana ou inteira\n");
+	}
+	$$ = ast_new_if($3, $5, NULL);
+      }
+    ;
+
+while_stmt:
+      WHILE LPAREN expr RPAREN stmt {
+        if ($4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT && $4 != NULL){
+           fprintf(stderr, "[ERRO SEMANTICO] A condição do while deve ser booleana ou inteira\n");
+        }
+        $$ = ast_new_while($4, NULL);
+      }
+    ;
+
+for_stmt:
+      FOR LPAREN expr_stmt expr_stmt expr RPAREN stmt {
+        if ($4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT && $4 != NULL){
+           fprintf(stderr, "[ERRO SEMANTICO] A condição do for deve ser booleana ou inteira\n");
+        }
+        $$ = ast_new_for($3, $4, $5, $7);
+      }
+
+     |FOR LAPREN decl_stmt expr_stmt expr RPAREN stmt {
+        if ($4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT && $4 != NULL){
+           fprintf(stderr, "[ERRO SEMANTICO] A condição do for deve ser booleana ou inteira\n");
+        }
+        $$ = ast_new_for($3, $4, $5, $7);
+      }
+
+     ;
+    
 %%
 
 int main() {
