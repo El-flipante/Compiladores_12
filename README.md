@@ -65,7 +65,7 @@ Para manter a documentação principal enxuta, todos os detalhes de implementaç
 > 🔍 **[Acessar Documentação de Testes e Evidências](./docs/testes.md)**
 
 *(Abaixo, um guia de onde encontrar os arquivos de teste no repositório)*  
-![Guia de Testes](./docs/guia_pastas.png)
+![Guia de Testes](./docs/img/guia_pastas.png)
 
 ---
 

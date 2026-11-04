@@ -1,160 +1,108 @@
-# Teste
-Foram implementados testes para verificar o funcionamento do analisador léxico e sintático, contemplando operações aritméticas, números negativos, uso de parênteses, precedência de operadores, divisão por zero e entradas inválidas.
+# Documentação de Testes
+A suíte de testes deste compilador é dividida em duas abordagens principais: Testes Unitários em C (para validar estruturas de dados internas como a Tabela de Símbolos e a AST) e Scripts de Automação em Shell (para validar a gramática, análise léxica, sintática e tratamento de erros do compilador completo através de arquivos de texto).
 
-Os testes foram divididos em **casos válidos** e **casos inválidos**, permitindo verificar tanto o reconhecimento correto das expressões quanto o tratamento de erros.
+## 1. Como Executar os Testes e Evidências
 
-### 1. Testes de expressões aritméticas válidas
+### 1.1 Testes Unitários (Tabela de Símbolos e AST)
+Os testes unitários garantem que o escopo de variáveis, inserção, busca, redeclaração e assinaturas de funções estão funcionando corretamente na memória.
 
-Os testes a seguir verificam operações básicas de soma, subtração, multiplicação e divisão.
+**Comandos de execução no Ubuntu (WSL):**
+```bash
+# Compilar e rodar os testes da AST (focado na Tabela de Símbolos e funções)
+gcc -Wall -I. -o roda_test_ast ./testes/test_ast.c symtab.c
+./roda_test_ast
 
+# Compilar e rodar os testes gerais da Tabela de Símbolos
+gcc -Wall -I. -o roda_test_symtab ./testes/test_symtab.c symtab.c
+./roda_test_symtab
+```
+**Evidência de Execução:**
+
+![Evidência dos testes unitários em C passando](/docs/img/execucao1.png)
+
+### 1.2 Testes de Automação (Léxico e Sintático)
+Estes scripts compilam os analisadores gerados pelo Flex/Bison e injetam arquivos de texto (`.txt`) contendo casos válidos e inválidos para validar a saída do compilador.
+
+**Comandos de execução no Ubuntu (WSL):**
+```bash
+# Testa a extração de tokens do analisador léxico
+testar_lexico.sh
+
+# Compila o projeto inteiro via Makefile e testa a árvore de derivação sintática
+testar_sintatico.sh
+```
+
+---
+
+## 2. Casos de Teste (Léxico, Sintático e Semântico)
+
+Os arquivos de texto consumidos pelos scripts `.sh` contemplam os seguintes cenários estruturais:
+
+### 2.1 Operações Aritméticas e Precedência
+Verificam operações de soma, subtração, multiplicação, divisão e o respeito à precedência de operadores matemáticos e agrupamento com parênteses.
 ```text
 5 + 3;
-5 - 3;
-10 * 3;
 10 * 10;
-10 / 2;
-0 / 5;
-```
-
-### 2. Testes com números negativos
-
-Verificam o reconhecimento do operador unário de negação e sua utilização em operações aritméticas.
-
-```text
-10 * -5;
--6 * 3;
-10 / -2;
--15 / 3;
--15 + 1*4;
--15 - 1*4;
-```
-
-### 3. Testes com números negativos entre parênteses
-
-Verificam o tratamento de valores negativos quando utilizados dentro de expressões agrupadas.
-
-```text
-10 * (-5);
-10 / (-2);
-(-6) * 3;
-(-15) / 3;
-(-15) - 1*4;
-(-15) + 1*4;
-```
-
-### 4. Testes de precedência e associação de operadores
-
-Verificam se o analisador respeita corretamente a precedência dos operadores aritméticos e o agrupamento definido pelos parênteses.
-
-```text
-4 - 3*15;
--15 - 1*4;
-(-15) - 1*4;
 (-15 - 4)*3;
-((-15) - 4)*3;
--(15 - 5)*3;
--15 + 1*4;
-(-15) + 1*4;
 10 / (5-3);
-10 / (1*5);
+```
+
+### 2.2 Números Negativos e Operadores Unários
+Verificam o reconhecimento do operador unário de negação isolado e em expressões.
+```text
+- 45;
+10 * -5;
 -(14*33);
 ```
 
-### 5. Testes com operador de módulo
+### 2.3 Tratamento de Erros Semânticos
+Com a implementação da Análise Semântica e Tabela de Símbolos, os testes agora validam a coerência do código.
 
-Verificam o reconhecimento e o funcionamento do operador `%`.
+*   **Uso de variável não declarada:**
+    ```text
+    y - 14;  // Erro se 'y' não existir na Tabela de Símbolos
+    ```
+*   **Divisão por zero literal:**
+    ```text
+    5 / 0;   // Barrado em tempo de compilação
+    ```
+*   **Operação entre tipos invalidos**
+    ```text
+    str / 67; // Erro operação como tipo invalido
+    ```
 
-```text
-3 % 14;
-14 % 3;
-```
+### 2.4 Tratamento de Entradas Inválidas (Erros Léxicos e Sintáticos)
+Garante que o compilador rejeita caracteres e estruturas que não pertencem à gramática estabelecida.
 
-### 6. Testes de operadores unários
+*   **Caracteres e Símbolos não suportados:**
+    ```text
+    22 ¨ 44;
+    700 @ 14;
+    11 - 15.
+    ```
+*   **Expressões Incompletas (Falta de pontuação ou fechamento):**
+    ```text
+    (114*3;
+    44 55 73;
+    ```
+*   **Identificadores Malformados:**
+    ```text
+    123erro;
+    ```
 
-Verificam a utilização isolada dos operadores `+` e `-` como operadores unários.
+---
 
-```text
-+ 33;
-- 45;
-- 33;
-```
+## 3. Código Intermediário
+O compilador agora traduz a Árvore Sintática Abstrata (AST) validada para Código de Três Endereços. A validação desta etapa é feita analisando a saída gerada após uma compilação bem-sucedida.
 
-### 7. Teste de divisão por zero
+---
 
-O teste abaixo verifica o comportamento do compilador diante de uma operação de divisão por zero.
+## 4. Resumo da Cobertura de Testes
 
-```text
-5 / 0;
-```
-a saida de erro específica desse teste será implementada junto com o analisador semântico
-### 8. Testes de entradas inválidas
-
-Os casos abaixo foram utilizados para verificar o tratamento de caracteres, operadores e estruturas que não pertencem à linguagem definida.
-
-#### 8.1 Caracteres inválidos
-
-```text
-@;
-.
-.
-22 ¨ 44;
-700 @ 14;
-```
-
-#### 8.2 Identificadores ou palavras não reconhecidas
-
-```text
-x;
-y - 14;
-14 * z;
-teste;
-123erro;
-554aiaiai;
-```
-
-#### 8.3 Operadores ou símbolos não suportados
-
-```text
-15 = 60;
-15 = 60/2;
-% 14;
-* 15;
-/ 22;
-11 - 15.
-```
-
-#### 8.4 Expressões incompletas ou estruturalmente inválidas
-
-```text
-1
-2
-3
-
-+ 10;
-
-1
-
-(114*3;
-114*3);
-
-44 55 73;
-
-2 + - 7;
-```
-
-Esses casos permitem verificar se o analisador é capaz de detectar expressões que não obedecem à gramática definida.
-
-### 9. Resumo dos testes
-
-| Categoria                        | Objetivo                                         |
-| -------------------------------- | ------------------------------------------------ |
-| Operações básicas                | Verificar `+`, `-`, `*` e `/`                    |
-| Números negativos                | Verificar operadores unários e valores negativos |
-| Parênteses                       | Verificar agrupamento de expressões              |
-| Precedência                      | Verificar a ordem de avaliação dos operadores    |
-| Módulo                           | Verificar o operador `%`                         |
-| Divisão por zero                 | Verificar tratamento de operação inválida        |
-| Caracteres inválidos             | Verificar erros léxicos                          |
-| Identificadores não reconhecidos | Verificar tokens não previstos                   |
-| Operadores inválidos             | Verificar símbolos não pertencentes à linguagem  |
-| Expressões inválidas             | Verificar erros sintáticos                       |
+| Etapa do Compilador | Ferramenta/Arquivo de Teste | O que é validado |
+| :--- | :--- | :--- |
+| **Léxico** | `testar_lexico.sh` | Geração de tokens válidos e rejeição de caracteres inválidos (`@`, `¨`). |
+| **Sintático** | `testar_sintatico.sh` | Precedência (`*` antes de `+`), parênteses, e detecção de expressões malformadas. |
+| **Tabela de Símbolos** | `test_symtab.c` / `test_ast.c` | Inserção, busca, shadowing, e controle de escopo (global vs local). |
+| **Semântico** | Arquivos `.txt` + Compilador | Bloqueio de variáveis não declaradas, redeclarações indevidas e divisão por zero. |
+| **Código Intermediário**| Saída no terminal | Tradução correta das expressões para o formato de Três Endereços. |
