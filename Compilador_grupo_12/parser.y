@@ -29,6 +29,7 @@ ASTNode *ast_root = NULL;
 
 %type <node> program stmt expr_stmt decl_stmt assign_stmt expr 
 %type <node> func_decl param_list param args_list block_stmt
+%type <node> if_stmt while_stmt for_stmt
 %type <data_type> type
 
 %nonassoc LOWER_THAN_ELSE
@@ -55,13 +56,10 @@ stmt:
     | assign_stmt { $$ = $1; }
     | func_decl   { $$ = $1; }
     | block_stmt  { $$ = $1; }
+    | if_stmt     { $$ = $1; }
+    | while_stmt  { $$ = $1; }
+    | for_stmt    { $$ = $1; }
     | RETURN expr SEMI { $$ = ast_new_return($2); }
-    | IF LPAREN expr RPAREN stmt %prec LOWER_THAN_ELSE { 
-        $$ = ast_new_if($3, $5); 
-    }
-    | IF LPAREN expr RPAREN stmt ELSE stmt { 
-        $$ = ast_new_if_else($3, $5, $7); 
-    }
     | error SEMI { 
         yyerrok; 
         fprintf(stderr, "[AVISO] Recuperado de erro sintatico antes do ponto e virgula.\n"); 
@@ -100,27 +98,20 @@ assign_stmt:
         }
         free($1);
     }
-    ;
-
-assign_stmt:
-      ID LBRACK expr RBRACK ASSIGN expr SEMI {
+    | ID LBRACK expr RBRACK ASSIGN expr SEMI {
         Symbol *s = lookup_symbol_global($1);
         if (!s) {
             fprintf(stderr, "[ERRO SEMANTICO] Atribuicao: Variavel '%s' nao foi declarada!\n", $1);
-        } else if (s->type != $3->expr_type) {
-            fprintf(stderr, "[ERRO SEMANTICO] A variavel '%s' deve ser um inteiro\n", $1);
+        } else if (s->type != $6->expr_type) {
+            fprintf(stderr, "[ERRO SEMANTICO] Tipo incompatível ao atribuir em '%s' \n", $1);
         }
 	
-	if ($3->expr_type != TYPE_INT) {
-	    fprintf(stderr, "[ERRO SEMANTICO] O indice de vetor '%s' deve ser um inteiro\n", $1);
-	}
+        if ($3->expr_type != TYPE_INT) {
+            fprintf(stderr, "[ERRO SEMANTICO] O indice de vetor '%s' deve ser um inteiro\n", $1);
+        }
 
-	if (s && s->type != $6->expr_type) {
-	    fprintf(stderr, "[ERRO SEMANTICO] Tipo incompatível ao atribuir em '%s' \n", $1);
-	}
-
-	$$ = ast_new_array_assign($1, $3, $6);
-	free($1);	
+        $$ = ast_new_array_assign($1, $3, $6);
+        free($1);	
     }
     ;
 
@@ -130,47 +121,47 @@ type:
     | FLOAT { $$ = TYPE_FLOAT; }
     ;
 
-// REGRAS DE EXPRESSAO UNIFICADAS
 expr:
-      expr PLUS expr      { if ($1->expr_type != $3->expr_type) 
-      {fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na soma!\n",);
-      $$ = ast_new_binop(PLUS, $1, $3);
-      $$->expr_type = TYPE_UNKNOWN;
-      } else {
-      $$ = ast_new_binop(PLUS, $1, $3);
-      $$->expr_type = $1->expr_type;}
-    }
-    ;
-    | expr MINUS expr     { if ($1->expr_type != $3->expr_type)
-    {fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na subtração!\n");
-    $$ = ast_new_binop(MINUS, $1, $3);
-    $$->expr_type = TYPE_UNKNOWN;
-    } else{ 
-    $$ = ast_new_binop(MINUS, $1, $3); 
-    $$->expr_type = $1->expr_type
+      expr PLUS expr      { 
+        if ($1->expr_type != $3->expr_type) {
+            fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na soma!\n");
+            $$ = ast_new_binop(PLUS, $1, $3);
+            $$->expr_type = TYPE_UNKNOWN;
+        } else {
+            $$ = ast_new_binop(PLUS, $1, $3);
+            $$->expr_type = $1->expr_type;
         }
-    }
-    ;
-    | expr TIMES expr     { if ($1->expr_type != $3->expr_type){
-    fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na multiplicação!\n");
-    $$ = ast_new_binop(TIMES, $1, $3);
-    $$->expr_type = TYPE_UNKNOWN;
-    }else{ 
-    $$ = ast_new_binop(TIMES, $1, $3);
-    $$->expr_type = $1->expr_type 
+      }
+    | expr MINUS expr     { 
+        if ($1->expr_type != $3->expr_type) {
+            fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na subtração!\n");
+            $$ = ast_new_binop(MINUS, $1, $3);
+            $$->expr_type = TYPE_UNKNOWN;
+        } else { 
+            $$ = ast_new_binop(MINUS, $1, $3); 
+            $$->expr_type = $1->expr_type;
         }
-    }
-    ;
-    | expr DIVIDE expr    { if ($1->expr_type != $3->expr_type){ 
-    fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na divisão!\n");
-    $$ = ast_new_binop(DIVIDE, $1, $3);
-    $$->expr_type = TYPE_UNKNOWN;
-    }else{
-    $$ = ast_new_binop(DIVIDE, $1, $3); 
-    $$->expr_type = $1->expr_type
+      }
+    | expr TIMES expr     { 
+        if ($1->expr_type != $3->expr_type) {
+            fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na multiplicação!\n");
+            $$ = ast_new_binop(TIMES, $1, $3);
+            $$->expr_type = TYPE_UNKNOWN;
+        } else { 
+            $$ = ast_new_binop(TIMES, $1, $3);
+            $$->expr_type = $1->expr_type;
         }
-    }
-    ;
+      }
+    | expr DIVIDE expr    { 
+        if ($1->expr_type != $3->expr_type) { 
+            fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na divisão!\n");
+            $$ = ast_new_binop(DIVIDE, $1, $3);
+            $$->expr_type = TYPE_UNKNOWN;
+        } else {
+            $$ = ast_new_binop(DIVIDE, $1, $3); 
+            $$->expr_type = $1->expr_type;
+        }
+      }
     | LPAREN expr RPAREN  { $$ = $2; }
     | NUM                 { $$ = ast_new_num($1); }
     | ID                  { 
@@ -182,8 +173,8 @@ expr:
             $$ = ast_new_id($1, s->type);
         }
         free($1);
-    }
-    | ID LPAREN args_list RPAREN { $$ = ast_new_func_call($1, $3); } // CHAMADA DE FUNCAO MOVIDA PARA CA
+      }
+    | ID LPAREN args_list RPAREN { $$ = ast_new_func_call($1, $3); } 
     ;
 
 func_decl:
@@ -213,39 +204,43 @@ block_stmt:
     ;
 
 if_stmt:
-      IF LPAREN expr RPAREN stmt {
-	if ($3->expr_type != TYPE_BOOL && $3->expr_type != TYPE_INT){
-	   fprintf(stderr, "[ERRO SEMANTICO] A condição do if deve ser booleana ou inteira\n");
-	}
-	$$ = ast_new_if($3, $5, NULL);
+      IF LPAREN expr RPAREN stmt %prec LOWER_THAN_ELSE {
+        if ($3->expr_type != TYPE_BOOL && $3->expr_type != TYPE_INT) {
+           fprintf(stderr, "[ERRO SEMANTICO] A condição do if deve ser booleana ou inteira\n");
+        }
+        $$ = ast_new_if($3, $5);
+      }
+    | IF LPAREN expr RPAREN stmt ELSE stmt { 
+        if ($3->expr_type != TYPE_BOOL && $3->expr_type != TYPE_INT) {
+           fprintf(stderr, "[ERRO SEMANTICO] A condição do if deve ser booleana ou inteira\n");
+        }
+        $$ = ast_new_if_else($3, $5, $7); 
       }
     ;
 
 while_stmt:
       WHILE LPAREN expr RPAREN stmt {
-        if ($4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT && $4 != NULL){
+        if ($3 != NULL && $3->expr_type != TYPE_BOOL && $3->expr_type != TYPE_INT) {
            fprintf(stderr, "[ERRO SEMANTICO] A condição do while deve ser booleana ou inteira\n");
         }
-        $$ = ast_new_while($4, NULL);
+        $$ = ast_new_while($3, $5);
       }
     ;
 
 for_stmt:
       FOR LPAREN expr_stmt expr_stmt expr RPAREN stmt {
-        if ($4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT && $4 != NULL){
+        if ($4 != NULL && $4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT) {
            fprintf(stderr, "[ERRO SEMANTICO] A condição do for deve ser booleana ou inteira\n");
         }
         $$ = ast_new_for($3, $4, $5, $7);
       }
-
-     |FOR LPAREN decl_stmt expr_stmt expr RPAREN stmt {
-        if ($4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT && $4 != NULL){
+    | FOR LPAREN decl_stmt expr_stmt expr RPAREN stmt {
+        if ($4 != NULL && $4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT) {
            fprintf(stderr, "[ERRO SEMANTICO] A condição do for deve ser booleana ou inteira\n");
         }
         $$ = ast_new_for($3, $4, $5, $7);
       }
-
-     ;
+    ;
     
 %%
 

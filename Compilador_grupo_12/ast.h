@@ -24,6 +24,7 @@ typedef struct ASTNode {
 
         struct {
             char *id;
+            struct ASTNode *index_expr; // ADICIONADO PARA SUPORTE A ARRAY
             struct ASTNode *expr;
         } assign;
 
@@ -88,29 +89,24 @@ typedef struct ASTNode {
     };
 } ASTNode;
 
-// Construtores originais
 ASTNode* ast_new_num(int val);
 ASTNode* ast_new_id(const char *id, DataType type);
 ASTNode* ast_new_binop(int op, ASTNode *left, ASTNode *right);
 ASTNode* ast_new_assign(const char *id, ASTNode *expr);
+ASTNode* ast_new_array_assign(const char *id, ASTNode *index_expr, ASTNode *expr); // NOVO
 ASTNode* ast_new_decl(const char *id, DataType data_type);
 ASTNode* ast_new_seq(ASTNode *stmt1, ASTNode *stmt2);
-
-// Construtores (Controle de Fluxo)
 ASTNode* ast_new_if(ASTNode *cond, ASTNode *if_branch);
 ASTNode* ast_new_if_else(ASTNode *cond, ASTNode *if_branch, ASTNode *else_branch);
 ASTNode* ast_new_while(ASTNode *cond, ASTNode *body);
 ASTNode* ast_new_for(ASTNode *init, ASTNode *cond, ASTNode *inc, ASTNode *body);
 ASTNode* ast_new_return(ASTNode *expr);
-
-// Construtores (Funcoes)
 ASTNode* ast_new_func_decl(const char *id, DataType ret_type, ASTNode *params, ASTNode *body);
 ASTNode* ast_new_func_call(const char *id, ASTNode *args);
 ASTNode* ast_new_param(const char *id, DataType type);
 ASTNode* ast_new_param_list(ASTNode *param_list, ASTNode *param);
 ASTNode* ast_new_args_list(ASTNode *args_list, ASTNode *expr);
 
-// Funcoes utilitarias
 void ast_print(ASTNode *node, int level);
 void ast_free(ASTNode *node);
 
