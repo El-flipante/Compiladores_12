@@ -5,7 +5,8 @@
 typedef enum {
     AST_NUM, AST_ID, AST_BINOP, AST_ASSIGN,
     AST_DECL, AST_SEQ, AST_IF, AST_WHILE, AST_FOR, AST_RETURN,
-    AST_FUNC_DECL, AST_FUNC_CALL, AST_PARAM, AST_PARAM_LIST, AST_ARGS_LIST
+    AST_FUNC_DECL, AST_FUNC_CALL, AST_PARAM, AST_PARAM_LIST, AST_ARGS_LIST,
+    AST_ARRAY_ACCESS
 } ASTNodeType;
 
 typedef struct ASTNode {
@@ -31,7 +32,14 @@ typedef struct ASTNode {
         struct {
             DataType data_type;
             char *id;
+            int is_array;
+            int array_size;
         } decl;
+
+        struct {
+            char *id;
+            struct ASTNode *index_expr;
+        } array_access;
 
         struct {
             struct ASTNode *stmt1;
@@ -95,6 +103,8 @@ ASTNode* ast_new_binop(int op, ASTNode *left, ASTNode *right);
 ASTNode* ast_new_assign(const char *id, ASTNode *expr);
 ASTNode* ast_new_array_assign(const char *id, ASTNode *index_expr, ASTNode *expr); // NOVO
 ASTNode* ast_new_decl(const char *id, DataType data_type);
+ASTNode* ast_new_array_decl(const char *id, DataType data_type, int array_size);
+ASTNode* ast_new_array_access(const char *id, ASTNode *index_expr, DataType data_type);
 ASTNode* ast_new_seq(ASTNode *stmt1, ASTNode *stmt2);
 ASTNode* ast_new_if(ASTNode *cond, ASTNode *if_branch);
 ASTNode* ast_new_if_else(ASTNode *cond, ASTNode *if_branch, ASTNode *else_branch);

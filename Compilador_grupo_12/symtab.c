@@ -147,7 +147,7 @@ Symbol* lookup_function(const char *name) {
 void close_scope(int scope) {
     Symbol *curr = symbol_table;
     while (curr != NULL) {
-        if (curr->scope >= scope && !curr->is_function) {
+        if (curr->scope == scope && !curr->is_function) {
             curr->is_active = 0;
         }
         curr = curr->next;
@@ -160,7 +160,7 @@ void clear_scope(int scope) {
     Symbol *prev = NULL;
 
     while (curr != NULL) {
-        if (curr->scope >= scope && !curr->is_function) {
+        if (curr->scope == scope && !curr->is_function) {
             Symbol *rem = curr;
             if (prev == NULL) {
                 symbol_table = curr->next;
