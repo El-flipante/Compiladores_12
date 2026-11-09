@@ -24,7 +24,7 @@ test-symtab: symtab.c testes/test_symtab.c
 	./testes/test_symtab
 
 test-ast: ast.c testes/test_ast.c
-	$(CC) $(CFLAGS) ast.c test_ast.c -o testes/test_ast
+	$(CC) $(CFLAGS) ast.c testes/test_ast.c -o testes/test_ast
 	./testes/test_ast
 
 test: test-symtab test-ast

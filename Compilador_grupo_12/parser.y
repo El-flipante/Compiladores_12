@@ -103,7 +103,7 @@ assign_stmt:
     ;
 
 assign_stmt:
-      ID LBRANCK expr RBRACK ASSIGN expr SEMI {
+      ID LBRACK expr RBRACK ASSIGN expr SEMI {
         Symbol *s = lookup_symbol_global($1);
         if (!s) {
             fprintf(stderr, "[ERRO SEMANTICO] Atribuicao: Variavel '%s' nao foi declarada!\n", $1);
@@ -132,7 +132,7 @@ type:
 
 // REGRAS DE EXPRESSAO UNIFICADAS
 expr:
-      expr PLUS expr      { if ($1->expr_type =! $3->expr_type) 
+      expr PLUS expr      { if ($1->expr_type != $3->expr_type) 
       {fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na soma!\n",);
       $$ = ast_new_binop(PLUS, $1, $3);
       $$->expr_type = TYPE_UNKNOWN;
@@ -140,8 +140,8 @@ expr:
       $$ = ast_new_binop(PLUS, $1, $3);
       $$->expr_type = $1->expr_type;}
     }
-
-    | expr MINUS expr     { if ($1->expr_type =! $3->expr_type)
+    ;
+    | expr MINUS expr     { if ($1->expr_type != $3->expr_type)
     {fprintf(stderr, "[ERRO SEMANTICO] Incompatibilidade de tipos na subtração!\n");
     $$ = ast_new_binop(MINUS, $1, $3);
     $$->expr_type = TYPE_UNKNOWN;
@@ -150,8 +150,8 @@ expr:
     $$->expr_type = $1->expr_type
         }
     }
-
-    | expr TIMES expr     { if ($1->expr_type =! $3->expr_type){
+    ;
+    | expr TIMES expr     { if ($1->expr_type != $3->expr_type){
     fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na multiplicação!\n");
     $$ = ast_new_binop(TIMES, $1, $3);
     $$->expr_type = TYPE_UNKNOWN;
@@ -160,8 +160,8 @@ expr:
     $$->expr_type = $1->expr_type 
         }
     }
-
-    | expr DIVIDE expr    { if ($1->expr_type =! $3->expr_type){ 
+    ;
+    | expr DIVIDE expr    { if ($1->expr_type != $3->expr_type){ 
     fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos na divisão!\n");
     $$ = ast_new_binop(DIVIDE, $1, $3);
     $$->expr_type = TYPE_UNKNOWN;
@@ -170,7 +170,7 @@ expr:
     $$->expr_type = $1->expr_type
         }
     }
-
+    ;
     | LPAREN expr RPAREN  { $$ = $2; }
     | NUM                 { $$ = ast_new_num($1); }
     | ID                  { 
@@ -238,7 +238,7 @@ for_stmt:
         $$ = ast_new_for($3, $4, $5, $7);
       }
 
-     |FOR LAPREN decl_stmt expr_stmt expr RPAREN stmt {
+     |FOR LPAREN decl_stmt expr_stmt expr RPAREN stmt {
         if ($4->expr_type != TYPE_BOOL && $4->expr_type != TYPE_INT && $4 != NULL){
            fprintf(stderr, "[ERRO SEMANTICO] A condição do for deve ser booleana ou inteira\n");
         }
