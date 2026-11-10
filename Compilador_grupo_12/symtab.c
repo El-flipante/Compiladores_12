@@ -84,6 +84,7 @@ Symbol* insert_symbol(const char *name, DataType type, int is_array, int array_s
     sym->is_active = 1;
 
     sym->is_function = 0;
+    sym->is_defined = 0;
     sym->return_type = TYPE_UNKNOWN;
     sym->param_count = 0;
     memset(sym->param_types, 0, sizeof(sym->param_types));
@@ -113,6 +114,7 @@ Symbol* insert_function(const char *name, DataType return_type, int param_count,
     sym->is_active = 1;
 
     sym->is_function = 1;
+    sym->is_defined = 1;
     sym->return_type = return_type;
     sym->param_count = param_count;
     for (int i = 0; i < param_count; i++) {

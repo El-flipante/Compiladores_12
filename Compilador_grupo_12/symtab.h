@@ -19,6 +19,7 @@ typedef struct Symbol {
     int array_size;
     int scope;
     int is_active;        // 1 = ativo no escopo, 0 = desativado
+    int is_defined;
     int is_function;      // 1 = função, 0 = variável/parâmetro
     DataType return_type; // Tipo de retorno da função
     int param_count;      // Número de parâmetros da função

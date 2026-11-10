@@ -27,7 +27,12 @@ test-ast: ast.c testes/test_ast.c
 	$(CC) $(CFLAGS) ast.c testes/test_ast.c -o testes/test_ast
 	./testes/test_ast
 
-test: test-symtab test-ast
+test-complementares: $(EXEC)
+	sh testes/testar_complementares.sh
+
+test: test-symtab test-complementares
 
 clean:
 	rm -f $(EXEC) $(BISON_C) $(BISON_H) $(FLEX_C) testes/test_symtab testes/test_ast
+
+.PHONY: all test test-symtab test-ast test-complementares clean

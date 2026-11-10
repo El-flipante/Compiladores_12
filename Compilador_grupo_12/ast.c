@@ -120,6 +120,7 @@ ASTNode* ast_new_decl(const char *id, DataType data_type) {
     node->decl.data_type = data_type;
     node->decl.is_array = 0;
     node->decl.array_size = 0;
+    node->decl.init_list = NULL;
     return node;
 }
 
@@ -244,12 +245,6 @@ void ast_print(ASTNode *node, int level) {
         case AST_NUM:  printf("NUM(%d)\n", node->intval); break;
         case AST_CHAR: printf("CHAR(%d)\n", node->intval); break;
         case AST_ID:   printf("ID(%s)\n", node->id); break;
-        case AST_DECL:
-            if (node->decl.is_array)
-                printf("ARRAY_DECLARATION(%s, %d)\n", node->decl.id, node->decl.array_size);
-            else
-                printf("DECLARATION(%s)\n", node->decl.id);
-            break;
         case AST_ARRAY_ACCESS:
             printf("ARRAY_ACCESS(%s)\n", node->array_access.id);
             ast_print(node->array_access.index_expr, level + 1);
@@ -311,15 +306,17 @@ void ast_print(ASTNode *node, int level) {
             ast_print(node->for_stmt.body, level + 2);
             break;
         case AST_FUNC_DECL:
-            printf("FUNC_DECL(%s)\n", node->func_decl.id);
+            printf("%s(%s)\n", node->func_decl.body ? "FUNC_DECL" : "FUNC_PROTO", node->func_decl.id);
             if (node->func_decl.params) {
                 print_indent(level + 1);
                 printf("PARAMS:\n");
                 ast_print(node->func_decl.params, level + 2);
             }
-            print_indent(level + 1);
-            printf("BODY:\n");
-            ast_print(node->func_decl.body, level + 2);
+            if (node->func_decl.body) {
+                print_indent(level + 1);
+                printf("BODY:\n");
+                ast_print(node->func_decl.body, level + 2);
+            }
             break;
         case AST_FUNC_CALL:
             printf("FUNC_CALL(%s)\n", node->func_call.id);
@@ -364,7 +361,6 @@ void ast_free(ASTNode *node) {
         case AST_ID:        free(node->id); break;
         case AST_BINOP:     ast_free(node->binop.left); ast_free(node->binop.right); break;
         case AST_ASSIGN:    free(node->assign.id); ast_free(node->assign.index_expr); ast_free(node->assign.expr); break;
-        case AST_DECL:      free(node->decl.id); break;
         case AST_ARRAY_ACCESS:
             free(node->array_access.id);
             ast_free(node->array_access.index_expr);
@@ -407,7 +403,7 @@ void ast_free(ASTNode *node) {
         case AST_UNOP:
             ast_free(node->unop.expr);
             break;
-        case AST_DECL:      
+        case AST_DECL:
             free(node->decl.id);
             if (node->decl.is_array && node->decl.init_list != NULL) {
                 ast_free(node->decl.init_list);

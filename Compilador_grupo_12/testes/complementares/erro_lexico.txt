@@ -1,0 +1,2 @@
+int valor;
+int 123abc;

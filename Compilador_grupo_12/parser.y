@@ -1,7 +1,8 @@
-﻿%{
+%{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "symtab.h"
 #include "ast.h"
 
@@ -28,6 +29,10 @@ int always_returns(ASTNode *node) {
             return 0;
     }
 }
+
+int validate_array_index(Symbol *array, ASTNode *index, const char *name);
+int validate_array_initializer(ASTNode *items, DataType element_type,
+                               int array_size, const char *name);
 
 ASTNode *make_comparison(int op, ASTNode *left, ASTNode *right) {
     ASTNode *node = ast_new_binop(op, left, right);
@@ -76,19 +81,40 @@ void extract_params(ASTNode *node) {
         else p_overflow = 1;
     }
 }
-void register_function(const char *name, DataType ret_type, ASTNode *param_list_node) {
+int register_function(const char *name, DataType ret_type, ASTNode *param_list_node,
+                      int is_definition) {
     p_count = 0;
     p_overflow = 0;
     extract_params(param_list_node);
     if (p_overflow) {
         current_function_signature_valid = 0;
         fprintf(stderr, "[ERRO SEMANTICO] Funcao '%s' excede o limite de %d parametros.\n", name, MAX_PARAMS);
-        return;
+        return 0;
+    }
+    Symbol *existing = lookup_function(name);
+    if (existing) {
+        int same_signature = existing->return_type == ret_type &&
+                             existing->param_count == p_count;
+        for (int i = 0; same_signature && i < p_count; i++)
+            same_signature = existing->param_types[i] == p_types[i];
+        if (!same_signature) {
+            fprintf(stderr, "[ERRO SEMANTICO] Assinatura de '%s' difere da declaracao anterior.\n", name);
+            return 0;
+        }
+        if (is_definition && existing->is_defined) {
+            fprintf(stderr, "[ERRO SEMANTICO] Funcao '%s' definida mais de uma vez.\n", name);
+            return 0;
+        }
+        if (is_definition) existing->is_defined = 1;
+        return 1;
     }
     Symbol *s = insert_function(name, ret_type, p_count, p_types);
     if (!s) {
         fprintf(stderr, "[ERRO SEMANTICO] Falha ao registrar funcao '%s' (ja existe ou muitos parametros).\n", name);
+        return 0;
     }
+    s->is_defined = is_definition;
+    return 1;
 }
 
 DataType a_types[MAX_PARAMS];
@@ -170,7 +196,7 @@ int validate_function_call(const char *name, ASTNode *args_list_node) {
 %token INT CHAR BOOL FLOAT VOID
 
 %type <node> program stmt expr_stmt decl_stmt assign_stmt expr
-%type <node> func_decl param_list param args_list block_stmt
+%type <node> func_decl func_header param_list param args_list block_stmt
 %type <node> if_stmt while_stmt for_stmt
 %type <node> for_init for_condition for_update
 %type <data_type> type
@@ -280,6 +306,8 @@ decl_stmt:
         } else if ($4 <= 0) {
             fprintf(stderr, "[ERRO SEMANTICO] O tamanho do vetor '%s' deve ser positivo.\n", $2);
             $$ = NULL;
+        } else if (!validate_array_initializer($8, $1, $4, $2)) {
+            $$ = NULL;
         } else {
             Symbol *s = insert_symbol($2, $1, 1, $4, current_scope);
             if (!s) {
@@ -322,14 +350,10 @@ assign_stmt:
         } else if (!s->is_array) {
             fprintf(stderr, "[ERRO SEMANTICO] '%s' nao e um vetor.\n", $1);
         }
-        if (!$3 || $3->expr_type != TYPE_INT) {
-            fprintf(stderr, "[ERRO SEMANTICO] O indice de vetor '%s' deve ser um inteiro.\n", $1);
+        if (s && s->is_array && !validate_array_index(s, $3, $1))
             valid = 0;
-        } else if (s && s->is_array && $3->type == AST_NUM &&
-                   ($3->intval < 0 || $3->intval >= s->array_size)) {
-            fprintf(stderr, "[ERRO SEMANTICO] Indice %d fora dos limites do vetor '%s'.\n", $3->intval, $1);
+        else if (!$3)
             valid = 0;
-        }
         if (s && s->is_array && $6 && s->type != $6->expr_type) {
             fprintf(stderr, "[ERRO SEMANTICO] Tipo incompativel ao atribuir em '%s'.\n", $1);
             valid = 0;
@@ -447,12 +471,7 @@ expr:
         } else if (!s->is_array) {
             fprintf(stderr, "[ERRO SEMANTICO] '%s' nao e um vetor.\n", $1);
             $$ = NULL;
-        } else if (!$3 || $3->expr_type != TYPE_INT) {
-            fprintf(stderr, "[ERRO SEMANTICO] O indice de vetor '%s' deve ser inteiro.\n", $1);
-            $$ = NULL;
-        } else if ($3->type == AST_NUM &&
-                   ($3->intval < 0 || $3->intval >= s->array_size)) {
-            fprintf(stderr, "[ERRO SEMANTICO] Indice %d fora dos limites do vetor '%s'.\n", $3->intval, $1);
+        } else if (!validate_array_index(s, $3, $1)) {
             $$ = NULL;
         } else {
             $$ = ast_new_array_access($1, $3, s->type);
@@ -469,18 +488,45 @@ expr:
     ;
 
 func_decl:
-      type ID LPAREN { current_scope++; current_function_signature_valid = 1; } param_list RPAREN {
-          current_function_return_type = $1;
+      func_header SEMI {
+          ASTNode *function = $1;
           if (current_function_signature_valid)
-              register_function($2, $1, $5);
-      } LBRACE program RBRACE {
+              current_function_signature_valid =
+                  register_function(function->func_decl.id,
+                                   function->func_decl.return_type,
+                                   function->func_decl.params, 0);
           close_scope(current_scope);
           current_scope--;
-          if (($1 == TYPE_INT || $1 == TYPE_CHAR) && !always_returns($9)) {
-              fprintf(stderr, "[ERRO SEMANTICO] Funcao '%s' pode terminar sem retornar um valor.\n", $2);
+          $$ = function;
+      }
+    | func_header LBRACE {
+          ASTNode *function = $1;
+          current_function_return_type = function->func_decl.return_type;
+          if (current_function_signature_valid)
+              current_function_signature_valid =
+                  register_function(function->func_decl.id,
+                                   function->func_decl.return_type,
+                                   function->func_decl.params, 1);
+      } program RBRACE {
+          ASTNode *function = $1;
+          DataType return_type = function->func_decl.return_type;
+          close_scope(current_scope);
+          current_scope--;
+          if ((return_type == TYPE_INT || return_type == TYPE_CHAR) &&
+              !always_returns($4)) {
+              fprintf(stderr, "[ERRO SEMANTICO] Funcao '%s' pode terminar sem retornar um valor.\n",
+                      function->func_decl.id);
           }
-          $$ = ast_new_func_decl($2, $1, $5, $9);
+          function->func_decl.body = $4;
           current_function_return_type = TYPE_UNKNOWN;
+          $$ = function;
+      }
+    ;
+
+func_header:
+      type ID LPAREN { current_scope++; current_function_signature_valid = 1; }
+      param_list RPAREN {
+          $$ = ast_new_func_decl($2, $1, $5, NULL);
           free($2);
       }
     ;
@@ -598,13 +644,15 @@ for_update:
     }
     | ID LBRACK expr RBRACK ASSIGN expr {
         Symbol *s = lookup_symbol($1, current_scope);
-        int valid = s && s->is_array && $3 && $3->expr_type == TYPE_INT && $6 && s->type == $6->expr_type;
+        int valid = s && s->is_array && $6 && s->type == $6->expr_type;
         if (!s || !s->is_array)
             fprintf(stderr, "[ERRO SEMANTICO] Alvo de vetor invalido no incremento do for.\n");
-        if (!$3 || $3->expr_type != TYPE_INT)
-            fprintf(stderr, "[ERRO SEMANTICO] Indice do vetor no for deve ser inteiro.\n");
-        if (s && s->is_array && $6 && s->type != $6->expr_type)
+        if (s && s->is_array && !validate_array_index(s, $3, $1))
+            valid = 0;
+        if (s && s->is_array && $6 && s->type != $6->expr_type) {
             fprintf(stderr, "[ERRO SEMANTICO] Tipo incompativel no incremento do for.\n");
+            valid = 0;
+        }
         $$ = valid ? ast_new_array_assign($1, $3, $6) : NULL;
         free($1);
     }
@@ -626,4 +674,103 @@ int main() {
 
 void yyerror(const char *s) {
     fprintf(stderr, "erro sintatico: %s\n", s);
+}
+
+int evaluate_constant_int(ASTNode *node, int *value) {
+    if (!node || !value) return 0;
+    if (node->type == AST_NUM) {
+        *value = node->intval;
+        return 1;
+    }
+    if (node->type == AST_UNOP && node->unop.op == MINUS) {
+        int operand;
+        if (!evaluate_constant_int(node->unop.expr, &operand) || operand == INT_MIN)
+            return 0;
+        *value = -operand;
+        return 1;
+    }
+    if (node->type != AST_BINOP) return 0;
+
+    int left, right;
+    if (!evaluate_constant_int(node->binop.left, &left) ||
+        !evaluate_constant_int(node->binop.right, &right))
+        return 0;
+
+    long long result;
+    switch (node->binop.op) {
+        case PLUS:  result = (long long) left + right; break;
+        case MINUS: result = (long long) left - right; break;
+        case TIMES: result = (long long) left * right; break;
+        case DIVIDE:
+            if (right == 0 || (left == INT_MIN && right == -1)) return 0;
+            result = left / right;
+            break;
+        case MOD:
+            if (right == 0 || (left == INT_MIN && right == -1)) return 0;
+            result = left % right;
+            break;
+        default:
+            return 0;
+    }
+    if (result < INT_MIN || result > INT_MAX) return 0;
+    *value = (int) result;
+    return 1;
+}
+
+int validate_array_index(Symbol *array, ASTNode *index, const char *name) {
+    if (!array || !array->is_array || !index || index->expr_type != TYPE_INT) {
+        fprintf(stderr, "[ERRO SEMANTICO] O indice de '%s' deve ser uma expressao inteira.\n", name);
+        return 0;
+    }
+
+    int constant_index;
+    if (evaluate_constant_int(index, &constant_index) &&
+        (constant_index < 0 || constant_index >= array->array_size)) {
+        fprintf(stderr, "[ERRO SEMANTICO] Indice %d fora dos limites do vetor '%s'.\n", constant_index, name);
+        return 0;
+    }
+    return 1;
+}
+
+static int validate_array_initializer_items(ASTNode *items, DataType element_type,
+                                            int array_size, const char *name,
+                                            int *count) {
+    if (!items) return 1;
+    int valid = 1;
+    if (items->type == AST_ARGS_LIST) {
+        valid &= validate_array_initializer_items(items->args_list.next, element_type,
+                                                  array_size, name, count);
+        ASTNode *item = items->args_list.expr;
+        (*count)++;
+        if (*count > array_size) {
+            fprintf(stderr, "[ERRO SEMANTICO] Inicializador do vetor '%s' tem mais elementos que o tamanho %d.\n",
+                    name, array_size);
+            valid = 0;
+        }
+        if (!item || item->expr_type != element_type) {
+            fprintf(stderr, "[ERRO SEMANTICO] Tipo incompativel no elemento %d do vetor '%s'.\n",
+                    *count, name);
+            valid = 0;
+        }
+        return valid;
+    }
+
+    (*count)++;
+    if (*count > array_size) {
+        fprintf(stderr, "[ERRO SEMANTICO] Inicializador do vetor '%s' tem mais elementos que o tamanho %d.\n",
+                name, array_size);
+        valid = 0;
+    }
+    if (items->expr_type != element_type) {
+        fprintf(stderr, "[ERRO SEMANTICO] Tipo incompativel no elemento %d do vetor '%s'.\n",
+                *count, name);
+        valid = 0;
+    }
+    return valid;
+}
+
+int validate_array_initializer(ASTNode *items, DataType element_type,
+                               int array_size, const char *name) {
+    int count = 0;
+    return validate_array_initializer_items(items, element_type, array_size, name, &count);
 }
