@@ -3,10 +3,10 @@
 #include "symtab.h"
 
 typedef enum {
-    AST_NUM, AST_ID, AST_BINOP, AST_ASSIGN,
+    AST_NUM, AST_CHAR, AST_ID, AST_BINOP, AST_ASSIGN,
     AST_DECL, AST_SEQ, AST_IF, AST_WHILE, AST_FOR, AST_RETURN,
     AST_FUNC_DECL, AST_FUNC_CALL, AST_PARAM, AST_PARAM_LIST, AST_ARGS_LIST,
-    AST_ARRAY_ACCESS
+    AST_ARRAY_ACCESS, AST_UNOP
 } ASTNodeType;
 
 typedef struct ASTNode {
@@ -34,12 +34,18 @@ typedef struct ASTNode {
             char *id;
             int is_array;
             int array_size;
+            struct ASTNode *init_list;
         } decl;
 
         struct {
             char *id;
             struct ASTNode *index_expr;
         } array_access;
+
+        struct {                      // <--- ADICIONADO AQUI
+            int op;                   // O operador (ex: MINUS)
+            struct ASTNode *expr;     // A expressão alvo do unário
+        } unop;
 
         struct {
             struct ASTNode *stmt1;
@@ -98,8 +104,10 @@ typedef struct ASTNode {
 } ASTNode;
 
 ASTNode* ast_new_num(int val);
+ASTNode* ast_new_char(int val);
 ASTNode* ast_new_id(const char *id, DataType type);
 ASTNode* ast_new_binop(int op, ASTNode *left, ASTNode *right);
+ASTNode* ast_new_unop(int op, ASTNode *expr);
 ASTNode* ast_new_assign(const char *id, ASTNode *expr);
 ASTNode* ast_new_array_assign(const char *id, ASTNode *index_expr, ASTNode *expr); // NOVO
 ASTNode* ast_new_decl(const char *id, DataType data_type);
@@ -116,6 +124,7 @@ ASTNode* ast_new_func_call(const char *id, ASTNode *args);
 ASTNode* ast_new_param(const char *id, DataType type);
 ASTNode* ast_new_param_list(ASTNode *param_list, ASTNode *param);
 ASTNode* ast_new_args_list(ASTNode *args_list, ASTNode *expr);
+ASTNode* ast_new_array_decl_init(const char *id, DataType data_type, int array_size, ASTNode *init_list);
 
 void ast_print(ASTNode *node, int level);
 void ast_free(ASTNode *node);
