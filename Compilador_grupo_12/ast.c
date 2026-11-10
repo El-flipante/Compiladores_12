@@ -148,8 +148,8 @@ ASTNode* ast_new_func_decl(const char *id, DataType ret_type, ASTNode *params, A
 ASTNode* ast_new_func_call(const char *id, ASTNode *args) {
     ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
     node->type = AST_FUNC_CALL;
-    Symbol *fn = lookup_symbol_global(id); // Ajustado para funcao global genérica
-    node->expr_type = fn ? fn->type : TYPE_INT; 
+    Symbol *fn = lookup_function(id); 
+    node->expr_type = fn ? fn->return_type : TYPE_UNKNOWN; 
     node->func_call.id = strdup(id);
     node->func_call.args = args;
     return node;
