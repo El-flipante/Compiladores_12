@@ -1,0 +1,35 @@
+int pequeno[2] = {1, 2, 3};
+char letras[2] = {'a', 1};
+int dados[3];
+int numero;
+float decimal;
+int dados_com_indice_invalido;
+
+int assinatura(int x);
+char assinatura(int x) {
+    return 'a';
+}
+
+int recebe_char(char c) {
+    return c;
+}
+
+int principal() {
+    dados[3] = 9;
+    numero = dados[decimal];
+    numero = dados_com_indice_invalido[0];
+    numero = decimal % 2;
+    numero = 5 % 0;
+    recebe_char(1);
+    ausente();
+    numero();
+    return;
+}
+
+void retorno_invalido() {
+    return 1;
+}
+
+int sem_retorno(int n) {
+    if (n) return n;
+}
