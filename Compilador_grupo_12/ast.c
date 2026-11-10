@@ -15,6 +15,25 @@ ASTNode* ast_new_num(int val) {
     return node;
 }
 
+ASTNode* ast_new_char(int val) {
+    ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
+    if (!node) return NULL;
+    node->type = AST_CHAR;
+    node->expr_type = TYPE_CHAR;
+    node->intval = val;
+    return node;
+}
+
+ASTNode* ast_new_unop(int op, ASTNode *expr) {
+    ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
+    node->type = AST_UNOP;
+    // O tipo de expressão resultante é o mesmo do operando
+    node->expr_type = expr ? expr->expr_type : TYPE_UNKNOWN;
+    node->unop.op = op;
+    node->unop.expr = expr;
+    return node;
+}
+
 ASTNode* ast_new_id(const char *id, DataType type) {
     ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
     node->type = AST_ID;
@@ -148,8 +167,8 @@ ASTNode* ast_new_func_decl(const char *id, DataType ret_type, ASTNode *params, A
 ASTNode* ast_new_func_call(const char *id, ASTNode *args) {
     ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
     node->type = AST_FUNC_CALL;
-    Symbol *fn = lookup_function(id); 
-    node->expr_type = fn ? fn->return_type : TYPE_UNKNOWN; 
+    Symbol *fn = lookup_function(id);
+    node->expr_type = fn ? fn->return_type : TYPE_UNKNOWN;
     node->func_call.id = strdup(id);
     node->func_call.args = args;
     return node;
@@ -192,6 +211,14 @@ ASTNode* ast_new_return(ASTNode *expr) {
     return node;
 }
 
+ASTNode* ast_new_array_decl_init(const char *id, DataType data_type, int array_size, ASTNode *init_list) {
+    ASTNode *node = ast_new_array_decl(id, data_type, array_size);
+    if (node) {
+        node->decl.init_list = init_list;
+    }
+    return node;
+}
+
 void ast_print(ASTNode *node, int level) {
     if (!node) return;
 
@@ -215,6 +242,7 @@ void ast_print(ASTNode *node, int level) {
 
     switch (node->type) {
         case AST_NUM:  printf("NUM(%d)\n", node->intval); break;
+        case AST_CHAR: printf("CHAR(%d)\n", node->intval); break;
         case AST_ID:   printf("ID(%s)\n", node->id); break;
         case AST_DECL:
             if (node->decl.is_array)
@@ -308,6 +336,22 @@ void ast_print(ASTNode *node, int level) {
             printf("RETURN\n");
             ast_print(node->return_stmt.expr, level + 1);
             break;
+        case AST_UNOP:
+            printf("UNOP(%d)\n", node->unop.op);
+            ast_print(node->unop.expr, level + 1);
+            break;
+        case AST_DECL:
+            if (node->decl.is_array) {
+                printf("ARRAY_DECLARATION(%s, %d)\n", node->decl.id, node->decl.array_size);
+                if (node->decl.init_list) {
+                    print_indent(level + 1);
+                    printf("INIT_LIST:\n");
+                    ast_print(node->decl.init_list, level + 2);
+                }
+            } else {
+                printf("DECLARATION(%s)\n", node->decl.id);
+            }
+            break;
         default:
             printf("Node Indefinido (%d)\n", node->type);
             break;
@@ -359,6 +403,15 @@ void ast_free(ASTNode *node) {
         case AST_ARGS_LIST:
             ast_free(node->args_list.expr);
             ast_free(node->args_list.next);
+            break;
+        case AST_UNOP:
+            ast_free(node->unop.expr);
+            break;
+        case AST_DECL:      
+            free(node->decl.id);
+            if (node->decl.is_array && node->decl.init_list != NULL) {
+                ast_free(node->decl.init_list);
+            }
             break;
         default: break;
     }

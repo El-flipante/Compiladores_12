@@ -40,7 +40,8 @@ Symbol* lookup_symbol(const char *name, int scope) {
     Symbol *curr = symbol_table;
 
     while (curr != NULL) {
-        if (curr->is_active && strcmp(curr->name, name) == 0 && curr->scope <= scope) {
+        if (curr->is_active && !curr->is_function &&
+            strcmp(curr->name, name) == 0 && curr->scope <= scope) {
             if (best == NULL || curr->scope > best->scope) {
                 best = curr;
             }
