@@ -10,6 +10,57 @@ void yyerror(const char *s);
 
 int current_scope = 0;
 ASTNode *ast_root = NULL;
+
+// ----- VALIDACAO DE FUNCOES -----
+DataType p_types[MAX_PARAMS];
+int p_count = 0;
+void extract_params(ASTNode *node) {
+    if (!node) return;
+    if (node->type == AST_PARAM_LIST) {
+        extract_params(node->param_list.next);
+        extract_params(node->param_list.param);
+    } else if (node->type == AST_PARAM) {
+        if (p_count < MAX_PARAMS) p_types[p_count++] = node->expr_type;
+    }
+}
+void register_function(const char *name, DataType ret_type, ASTNode *param_list_node) {
+    p_count = 0;
+    extract_params(param_list_node);
+    Symbol *s = insert_function(name, ret_type, p_count, p_types);
+    if (!s) {
+        fprintf(stderr, "[ERRO SEMANTICO] Falha ao registrar funcao '%s' (ja existe ou muitos parametros).\n", name);
+    }
+}
+
+DataType a_types[MAX_PARAMS];
+int a_count = 0;
+void extract_args(ASTNode *node) {
+    if (!node) return;
+    if (node->type == AST_ARGS_LIST) {
+        extract_args(node->args_list.next);
+        extract_args(node->args_list.expr);
+    } else {
+        if (a_count < MAX_PARAMS) a_types[a_count++] = node->expr_type;
+    }
+}
+void validate_function_call(const char *name, ASTNode *args_list_node) {
+    Symbol *fn = lookup_function(name);
+    if (!fn) {
+        fprintf(stderr, "[ERRO SEMANTICO] Funcao '%s' nao declarada!\n", name);
+        return;
+    }
+    a_count = 0;
+    extract_args(args_list_node);
+    if (a_count != fn->param_count) {
+        fprintf(stderr, "[ERRO SEMANTICO] Funcao '%s' espera %d argumentos, mas %d foram passados.\n", name, fn->param_count, a_count);
+        return;
+    }
+    for (int i = 0; i < a_count; i++) {
+        if (a_types[i] != fn->param_types[i] && a_types[i] != TYPE_UNKNOWN && fn->param_types[i] != TYPE_UNKNOWN) {
+            fprintf(stderr, "[ERRO SEMANTICO] Tipo incompativel no argumento %d da chamada a '%s'.\n", i+1, name);
+        }
+    }
+}
 %}
 
 %union {
@@ -145,6 +196,8 @@ type:
       INT   { $$ = TYPE_INT; }
     | CHAR  { $$ = TYPE_CHAR; }
     | FLOAT { $$ = TYPE_FLOAT; }
+    | BOOL  { $$ = TYPE_BOOL; }
+    | VOID  { $$ = TYPE_VOID; }
     ;
 
 expr:
@@ -188,6 +241,16 @@ expr:
             $$->expr_type = $1->expr_type;
         }
       }
+    | expr MOD expr    {
+        if (!$1 || !$3 || $1->expr_type != $3->expr_type) {
+            fprintf(stderr, "[ERRO SEMANTICO] Incopatibilidade de tipos no modulo!\n");
+            $$ = ast_new_binop(MOD, $1, $3);
+            $$->expr_type = TYPE_UNKNOWN;
+        } else {
+            $$ = ast_new_binop(MOD, $1, $3);
+            $$->expr_type = $1->expr_type;
+        }
+      }
     | LPAREN expr RPAREN  { $$ = $2; }
     | NUM                 { $$ = ast_new_num($1); }
     | ID                  {
@@ -220,14 +283,20 @@ expr:
         }
         free($1);
       }
-    | ID LPAREN args_list RPAREN { $$ = ast_new_func_call($1, $3); }
+    | ID LPAREN args_list RPAREN { 
+        validate_function_call($1, $3);
+        $$ = ast_new_func_call($1, $3); 
+        free($1);
+      }
     ;
 
 func_decl:
-      type ID LPAREN { current_scope++; } param_list RPAREN LBRACE program RBRACE {
+      type ID LPAREN { current_scope++; } param_list RPAREN {
+          register_function($2, $1, $5);
+      } LBRACE program RBRACE {
           close_scope(current_scope);
           current_scope--;
-          $$ = ast_new_func_decl($2, $1, $5, $8);
+          $$ = ast_new_func_decl($2, $1, $5, $9);
           free($2);
       }
     ;
