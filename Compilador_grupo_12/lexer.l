@@ -32,7 +32,7 @@ id ({letter}|{under})({letter}|{digit}|{under})*
     return STRING_LITERAL; 
 }
 
-{number}{letter}+       { printf("'%s' eh invalido\n", yytext); exit(1); }
+{number}{letter}+       { fprintf(stderr, "[ERRO LEXICO] Identificador invalido: '%s'\n", yytext); exit(1); }
 {number}          { yylval.intval = atoi(yytext); return NUM; }
 {id}            { yylval.id = strdup(yytext); return ID; }
 "+"             { return PLUS; }
@@ -55,7 +55,7 @@ id ({letter}|{under})({letter}|{digit}|{under})*
 
 [ \t\n\r]+  { }
 
-.           { printf("Caractere nao reconhecido: %s\n", yytext); }
+.           { fprintf(stderr, "[ERRO LEXICO] Caractere invalido: %s\n", yytext); exit(1); }
 
 %%
 
