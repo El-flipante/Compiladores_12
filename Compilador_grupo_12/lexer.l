@@ -59,12 +59,12 @@ id ({letter}|{under})({letter}|{digit}|{under})*
 
 {number}({letter}|{under})({letter}|{digit}|{under})* { fprintf(stderr, "[ERRO LEXICO] Identificador nao pode comecar com numero: '%s'\n", yytext); exit(1); }
 {number}          { yylval.intval = atoi(yytext); return NUM; }
-{id}            { yylval.id = strdup(yytext); return ID; }
-"+"             { return PLUS; }
+{id}        { yylval.id = strdup(yytext); return ID; }
+"+"         { return PLUS; }
 "-"         { return MINUS; }
 "*"         { return TIMES; }
 "/"         { return DIVIDE; }
-"%"	    { return MOD; }
+"%"	        { return MOD; }
 "<="        { return LE; }
 ">="        { return GE; }
 "=="        { return EQ; }

@@ -30,9 +30,15 @@ test-ast: ast.c testes/test_ast.c
 test-complementares: $(EXEC)
 	sh testes/testar_complementares.sh
 
-test: test-symtab test-complementares
+test-lexer:
+	sh testes/testar_lexico.sh
+
+test-ast-output: $(EXEC)
+	sh testes/testar_ast.sh
+
+test: test-symtab test-lexer test-ast-output test-complementares
 
 clean:
 	rm -f $(EXEC) $(BISON_C) $(BISON_H) $(FLEX_C) testes/test_symtab testes/test_ast
 
-.PHONY: all test test-symtab test-ast test-complementares clean
+.PHONY: all test test-symtab test-ast test-lexer test-ast-output test-complementares clean
