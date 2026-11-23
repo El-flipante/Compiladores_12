@@ -184,6 +184,12 @@ int validate_function_call(const char *name, ASTNode *args_list_node) {
 }
 %}
 
+/* YYSTYPE is also declared in parser.tab.h, so its types must be visible
+   to every file that includes that header (including lexer test harnesses). */
+%code requires {
+#include "symtab.h"
+}
+
 %union {
     int intval;
     char *id;

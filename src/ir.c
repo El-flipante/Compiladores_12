@@ -282,8 +282,15 @@ static Operand gen_expr(ASTNode *n) {
                 Operand value = gen_expr(args.v[i]);
                 // Capture the value now: later arguments may call functions that
                 // modify a variable referenced by an earlier argument.
-                vals[i] = new_temp();
-                emit(IR_COPY, value, opd_none(), vals[i], TYPE_UNKNOWN);
+                if (i + 1 < args.n && value.kind == OPD_VAR) {
+                    vals[i] = new_temp();
+                    emit(IR_COPY, value, opd_none(), vals[i], TYPE_UNKNOWN);
+                } else {
+                    // Constants and temporaries cannot change while later
+                    // arguments are evaluated; the last argument is already
+                    // evaluated immediately before the PARAM instructions.
+                    vals[i] = value;
+                }
             }
             for (int i = 0; i < args.n; i++)
                 emit(IR_PARAM, vals[i], opd_none(), opd_none(), TYPE_UNKNOWN);
