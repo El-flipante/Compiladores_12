@@ -1,0 +1,19 @@
+int tab[5];
+int soma(int n) {
+    int r;
+    r = 0;
+    for (int i = 0; i < n; i = i + 1) { r = r + tab[i]; }
+    return r;
+}
+int main() {
+    int loc[6] = {1, 2, 3};
+    char cs[3] = {'a', 'b'};
+    char ch;
+    ch = cs[1];
+    if (ch == 'b') loc[0] = 1;
+    if (cs[2] == '\0') loc[2] = loc[2] + 50;
+    for (int i = 0; i < 5; i = i + 1) { tab[i] = i * i; }
+    loc[5] = soma(5);
+    loc[loc[0]] = loc[5] - loc[2];
+    return loc[1] + loc[3] + loc[4] + loc[5];
+}

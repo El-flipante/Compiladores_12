@@ -1,0 +1,15 @@
+=== CODIGO INTERMEDIARIO (TRES ENDERECOS) ===
+global x : int
+func main : int
+    decl x.1 : int
+    x.1 = 1
+    decl x.2 : int
+    x.2 = 2
+    decl x.3 : int
+    x.3 = 3
+    t1 = x.2 + 10
+    x.2 = t1
+    t2 = x.1 + 100
+    return t2
+endfunc
+=============================================

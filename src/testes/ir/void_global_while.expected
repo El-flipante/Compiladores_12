@@ -1,0 +1,41 @@
+=== CODIGO INTERMEDIARIO (TRES ENDERECOS) ===
+global cont : int
+func inc : void
+    t1 = cont + 1
+    cont = t1
+    return
+endfunc
+func incn : void
+    formal n : int
+    decl i : int
+    i = 0
+  L1:
+    t1 = i < n
+    if_false t1 goto L2
+    call inc, 0
+    t2 = i + 1
+    i = t2
+    goto L1
+  L2:
+    return
+endfunc
+func cedo : void
+    formal n : int
+    t1 = n > 2
+    if_false t1 goto L3
+    return
+  L3:
+    t2 = cont + 100
+    cont = t2
+    return
+endfunc
+func main : int
+    param 5
+    call incn, 1
+    param 1
+    call cedo, 1
+    param 9
+    call cedo, 1
+    return cont
+endfunc
+=============================================

@@ -6,7 +6,7 @@ typedef enum {
     AST_NUM, AST_CHAR, AST_ID, AST_BINOP, AST_ASSIGN,
     AST_DECL, AST_SEQ, AST_IF, AST_WHILE, AST_FOR, AST_RETURN,
     AST_FUNC_DECL, AST_FUNC_CALL, AST_PARAM, AST_PARAM_LIST, AST_ARGS_LIST,
-    AST_ARRAY_ACCESS, AST_UNOP
+    AST_ARRAY_ACCESS, AST_UNOP, AST_BLOCK
 } ASTNodeType;
 
 typedef struct ASTNode {
@@ -51,6 +51,10 @@ typedef struct ASTNode {
             struct ASTNode *stmt1;
             struct ASTNode *stmt2;
         } seq;
+
+        struct {                      // bloco { ... } e corpo de funcao (marca um escopo)
+            struct ASTNode *body;     // pode ser NULL (bloco vazio)
+        } block;
 
         struct {
             struct ASTNode *cond;
@@ -114,6 +118,7 @@ ASTNode* ast_new_decl(const char *id, DataType data_type);
 ASTNode* ast_new_array_decl(const char *id, DataType data_type, int array_size);
 ASTNode* ast_new_array_access(const char *id, ASTNode *index_expr, DataType data_type);
 ASTNode* ast_new_seq(ASTNode *stmt1, ASTNode *stmt2);
+ASTNode* ast_new_block(ASTNode *body);
 ASTNode* ast_new_if(ASTNode *cond, ASTNode *if_branch);
 ASTNode* ast_new_if_else(ASTNode *cond, ASTNode *if_branch, ASTNode *else_branch);
 ASTNode* ast_new_while(ASTNode *cond, ASTNode *body);
