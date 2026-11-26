@@ -10,8 +10,8 @@ CFLAGS = -Wall -I.
 
 all: $(EXEC)
 
-$(EXEC): $(BISON_C) $(FLEX_C) symtab.c ast.c ir.c ir.h
-	$(CC) $(CFLAGS) -o $@ $(BISON_C) $(FLEX_C) symtab.c ast.c ir.c
+$(EXEC): $(BISON_C) $(FLEX_C) symtab.c ast.c ir.c ir.h codegen.c codegen.h
+	$(CC) $(CFLAGS) -o $@ $(BISON_C) $(FLEX_C) symtab.c ast.c ir.c codegen.c
 
 $(BISON_C) $(BISON_H): $(BISON_FILE)
 	bison -d $(BISON_FILE)

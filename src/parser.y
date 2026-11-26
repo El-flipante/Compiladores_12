@@ -6,6 +6,7 @@
 #include "symtab.h"
 #include "ast.h"
 #include "ir.h"
+#include "codegen.h"
 
 int yylex(void);
 void yyerror(const char *s);
@@ -692,6 +693,17 @@ int main() {
             printf("\n=== CODIGO INTERMEDIARIO (TRES ENDERECOS) ===\n");
             ir_print(ir, stdout);
             printf("=============================================\n");
+
+            // Geracao de codigo final: traduz o codigo intermediario para Assembly.
+            AsmProgram *code = codegen_generate(ir);
+            if (code->errors == 0) {
+                printf("\n=== CODIGO FINAL (ASSEMBLY RISC-V) ===\n");
+                codegen_print(code, stdout);
+                printf("======================================\n");
+            } else {
+                fprintf(stderr, "[AVISO] Codigo final nao gerado: %d erro(s) na geracao.\n", code->errors);
+            }
+            codegen_free(code);
         } else {
             fprintf(stderr, "[AVISO] Codigo intermediario nao gerado: %d erro(s) na geracao.\n", ir->errors);
         }
