@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 190 "parser.y"
+#line 191 "parser.y"
 
 #include "symtab.h"
 
@@ -104,7 +104,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 194 "parser.y"
+#line 195 "parser.y"
 
     int intval;
     char *id;

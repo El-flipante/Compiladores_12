@@ -185,8 +185,9 @@ int validate_function_call(const char *name, ASTNode *args_list_node) {
 }
 %}
 
-/* YYSTYPE is also declared in parser.tab.h, so its types must be visible
-   to every file that includes that header (including lexer test harnesses). */
+/* YYSTYPE tambem e declarado em parser.tab.h, portanto seus tipos precisam
+   estar visiveis para todo arquivo que inclui esse cabecalho, inclusive os
+   programas de teste do analisador lexico. */
 %code requires {
 #include "symtab.h"
 }

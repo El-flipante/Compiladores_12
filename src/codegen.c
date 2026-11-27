@@ -572,8 +572,9 @@ AsmProgram *codegen_generate(const IRProgram *ir) {
     AsmProgram *code = (AsmProgram *) calloc(1, sizeof(AsmProgram));
     if (!code) { fprintf(stderr, "[ERRO CODIGO FINAL] memoria insuficiente.\n"); exit(1); }
 
-    /* Use only standard C file operations; open_memstream is a GNU extension
-       and is unavailable in some Windows toolchains (including MinGW). */
+    /* Usa apenas operacoes padrao de arquivos em C; open_memstream e uma
+       extensao do GNU indisponivel em algumas ferramentas para Windows,
+       incluindo o MinGW. */
     out = tmpfile();
     if (!out) {
         fprintf(stderr, "[ERRO CODIGO FINAL] nao foi possivel criar arquivo temporario.\n");

@@ -40,11 +40,17 @@ test-lexer:
 test-ast-output: $(EXEC)
 	sh testes/testar_ast.sh
 
+test-codegen: $(EXEC)
+	sh testes/testar_codegen.sh
+
+test-exec: $(EXEC) testes/rv32sim.c
+	sh testes/testar_execucao.sh
+
 test: test-symtab test-lexer test-ast-output test-complementares test-ir
 
 ifeq ($(strip $(PROGRAMA)),)
 execute:
-	@echo "Uso: make execute PROGRAMA=caminho/do/arquivo.c"
+	@echo "Uso: make execute PROGRAMA=../programas/meu_programa.c"
 	@exit 2
 else
 execute: $(EXEC)
@@ -58,4 +64,4 @@ endif
 clean:
 	rm -f $(EXEC) $(BISON_C) $(BISON_H) $(FLEX_C) testes/test_symtab testes/test_ast
 
-.PHONY: all execute test test-symtab test-ast test-lexer test-ast-output test-complementares test-ir clean
+.PHONY: all execute test test-symtab test-ast test-lexer test-ast-output test-complementares test-ir test-codegen test-exec clean

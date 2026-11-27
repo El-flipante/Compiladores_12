@@ -280,15 +280,15 @@ static Operand gen_expr(ASTNode *n) {
             if (!vals) { fprintf(stderr, "[ERRO GERACAO] memoria insuficiente.\n"); exit(1); }
             for (int i = 0; i < args.n; i++) {
                 Operand value = gen_expr(args.v[i]);
-                // Capture the value now: later arguments may call functions that
-                // modify a variable referenced by an earlier argument.
+                // Guarda o valor neste ponto: argumentos posteriores podem chamar
+                // funcoes que alteram uma variavel usada em argumento anterior.
                 if (i + 1 < args.n && value.kind == OPD_VAR) {
                     vals[i] = new_temp();
                     emit(IR_COPY, value, opd_none(), vals[i], TYPE_UNKNOWN);
                 } else {
-                    // Constants and temporaries cannot change while later
-                    // arguments are evaluated; the last argument is already
-                    // evaluated immediately before the PARAM instructions.
+                    // Constantes e temporarios nao mudam durante a avaliacao dos
+                    // argumentos seguintes; o ultimo ja e avaliado imediatamente
+                    // antes das instrucoes PARAM.
                     vals[i] = value;
                 }
             }
