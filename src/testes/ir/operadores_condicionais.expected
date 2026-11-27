@@ -1,0 +1,64 @@
+=== CODIGO INTERMEDIARIO (TRES ENDERECOS) ===
+func main : int
+    decl a : int
+    decl b : int
+    decl r : int
+    t1 = -7
+    a = t1
+    b = 2
+    r = 0
+    t2 = a / b
+    t3 = r + t2
+    r = t3
+    t4 = a % b
+    t5 = r + t4
+    r = t5
+    t6 = -a
+    t7 = t6 * b
+    t8 = r + t7
+    r = t8
+    t9 = a + b
+    t10 = a - b
+    t11 = t9 * t10
+    t12 = r + t11
+    r = t12
+    t13 = a < b
+    if_false t13 goto L1
+    t14 = r + 1
+    r = t14
+  L1:
+    t15 = a > b
+    if_false t15 goto L2
+    t16 = r + 2
+    r = t16
+  L2:
+    t17 = -7
+    t18 = a <= t17
+    if_false t18 goto L3
+    t19 = r + 4
+    r = t19
+  L3:
+    t20 = b >= 3
+    if_false t20 goto L5
+    t21 = r + 8
+    r = t21
+    goto L4
+  L5:
+    t22 = r + 16
+    r = t22
+  L4:
+    t23 = -7
+    t24 = a == t23
+    if_false t24 goto L6
+    t25 = r + 32
+    r = t25
+  L6:
+    t26 = -7
+    t27 = a != t26
+    if_false t27 goto L7
+    t28 = r + 64
+    r = t28
+  L7:
+    return r
+endfunc
+=============================================

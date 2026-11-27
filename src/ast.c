@@ -154,6 +154,14 @@ ASTNode* ast_new_seq(ASTNode *stmt1, ASTNode *stmt2) {
     return node;
 }
 
+ASTNode* ast_new_block(ASTNode *body) {
+    ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
+    node->type = AST_BLOCK;
+    node->expr_type = TYPE_VOID;
+    node->block.body = body;
+    return node;
+}
+
 ASTNode* ast_new_func_decl(const char *id, DataType ret_type, ASTNode *params, ASTNode *body) {
     ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
     node->type = AST_FUNC_DECL;
@@ -226,6 +234,10 @@ void ast_print(ASTNode *node, int level) {
     if (node->type == AST_SEQ) {
         ast_print(node->seq.stmt1, level);
         ast_print(node->seq.stmt2, level);
+        return;
+    }
+    if (node->type == AST_BLOCK) {   // o bloco nao altera a impressao da arvore
+        ast_print(node->block.body, level);
         return;
     }
     if (node->type == AST_PARAM_LIST) {
@@ -366,6 +378,7 @@ void ast_free(ASTNode *node) {
             ast_free(node->array_access.index_expr);
             break;
         case AST_SEQ:       ast_free(node->seq.stmt1); ast_free(node->seq.stmt2); break;
+        case AST_BLOCK:     ast_free(node->block.body); break;
         case AST_IF:
             ast_free(node->if_stmt.cond);
             ast_free(node->if_stmt.if_branch);

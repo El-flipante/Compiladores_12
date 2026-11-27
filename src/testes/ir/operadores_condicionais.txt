@@ -1,0 +1,17 @@
+int main() {
+    int a;
+    int b;
+    int r;
+    a = -7; b = 2; r = 0;
+    r = r + a / b;
+    r = r + a % b;
+    r = r + -a * b;
+    r = r + (a + b) * (a - b);
+    if (a < b) r = r + 1;
+    if (a > b) r = r + 2;
+    if (a <= -7) r = r + 4;
+    if (b >= 3) r = r + 8; else r = r + 16;
+    if (a == -7) r = r + 32;
+    if (a != -7) r = r + 64;
+    return r;
+}

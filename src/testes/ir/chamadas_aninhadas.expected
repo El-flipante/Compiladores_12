@@ -1,0 +1,47 @@
+=== CODIGO INTERMEDIARIO (TRES ENDERECOS) ===
+func add : int
+    formal a : int
+    formal b : int
+    t1 = a + b
+    return t1
+endfunc
+func mul : int
+    formal a : int
+    formal b : int
+    t1 = a * b
+    return t1
+endfunc
+func sub3 : int
+    formal a : int
+    formal b : int
+    formal c : int
+    t1 = a - b
+    t2 = t1 - c
+    return t2
+endfunc
+func main : int
+    param 2
+    param 3
+    t1 = call mul, 2
+    param t1
+    param 4
+    t2 = call add, 2
+    param 1
+    param 2
+    t3 = call mul, 2
+    param 1
+    param t3
+    t4 = call add, 2
+    param 1
+    param 1
+    t5 = call add, 2
+    param t5
+    param 1
+    t6 = call mul, 2
+    param t2
+    param t4
+    param t6
+    t7 = call sub3, 3
+    return t7
+endfunc
+=============================================

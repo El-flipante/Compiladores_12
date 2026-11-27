@@ -1,0 +1,17 @@
+int cont;
+void inc() { cont = cont + 1; }
+void incn(int n) {
+    int i;
+    i = 0;
+    while (i < n) { inc(); i = i + 1; }
+}
+void cedo(int n) {
+    if (n > 2) return;
+    cont = cont + 100;
+}
+int main() {
+    incn(5);
+    cedo(1);
+    cedo(9);
+    return cont;
+}
