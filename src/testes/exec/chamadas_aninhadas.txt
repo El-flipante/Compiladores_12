@@ -1,0 +1,19 @@
+// Argumentos que sao chamadas, resultados de chamadas em expressoes e
+// variaveis locais que precisam sobreviver as chamadas.
+int soma(int a, int b) { return a + b; }
+int mult(int a, int b) { return a * b; }
+int quad(int n) { return mult(n, n); }
+int diff(int a, int b) { return a - b; }
+
+int main() {
+    int a;
+    int b;
+    int r;
+    a = 3;
+    b = 4;
+    r = soma(quad(a), quad(b));
+    r = r * 100 + soma(mult(a, b), soma(quad(2), diff(10, quad(3))));
+    r = r * 100 + diff(soma(a, soma(b, quad(a))), mult(diff(b, a), 2)) * 2 + a * b;
+    r = r * 10 + quad(soma(1, 1)) + soma(diff(5, 3), a) * mult(b, 1);
+    return r + a + b;
+}

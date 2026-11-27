@@ -1,0 +1,24 @@
+// bool: variaveis locais e globais recebem o resultado de comparacoes; funcoes
+// bool servem de condicao; bool pode ser comparado com bool.
+bool global_flag;
+
+bool menor(int a, int b) {
+    return a < b;
+}
+
+int main() {
+    bool b;
+    int r;
+    r = 0;
+    b = 3 < 4;
+    if (b) r = r + 1;
+    b = 5 < 4;
+    if (b) r = r + 10;
+    global_flag = 2 == 2;
+    if (global_flag) r = r + 100;
+    if (menor(1, 2)) r = r + 1000;
+    if (menor(3, 2)) r = r + 10000;
+    if (b == global_flag) r = r + 100000;
+    if (b != global_flag) r = r + 200000;
+    return r;
+}

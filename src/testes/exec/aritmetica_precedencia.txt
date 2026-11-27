@@ -1,0 +1,19 @@
+// Precedencia e associatividade: * / % antes de + -, associatividade a esquerda,
+// menos unario e parenteses.
+int main() {
+    int a;
+    int b;
+    int r;
+    a = 7;
+    b = 3;
+    r = 0;
+    r = r * 31 + (2 + 3 * 4 - 10 / 3 + 7 % 4 - -5);
+    r = r * 31 + (100 - 30 - 20 - 10);
+    r = r * 31 + (100 / 5 / 2);
+    r = r * 31 + (100 % 7 % 4);
+    r = r * 31 + (a - b * (a - b) + -a * -b);
+    r = r * 31 + (-(a + b) * 2);
+    r = r * 31 + (((a)) * ((b)) - (a - b));
+    r = r * 31 + (a + b * a - b / 2 % 2);
+    return r;
+}

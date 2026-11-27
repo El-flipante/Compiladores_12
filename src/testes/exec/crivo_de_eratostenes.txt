@@ -1,0 +1,15 @@
+int main() {
+    int composto[60];
+    int primos;
+    for (int i = 0; i < 60; i = i + 1) composto[i] = 0;
+    for (int i = 2; i < 60; i = i + 1) {
+        if (composto[i] == 0) {
+            for (int j = i * i; j < 60; j = j + i) composto[j] = 1;
+        }
+    }
+    primos = 0;
+    for (int i = 2; i < 60; i = i + 1) {
+        if (composto[i] == 0) primos = primos + 1;
+    }
+    return primos;
+}

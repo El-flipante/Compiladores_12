@@ -1,0 +1,11 @@
+int contador;
+char marca;
+int tabela[4] = {1, -2, 3};
+char letras[5] = {'a', 'b'};
+int vazio[3];
+
+int main() {
+    contador = tabela[1];
+    marca = letras[0];
+    return contador;
+}

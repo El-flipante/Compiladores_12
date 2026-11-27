@@ -1,0 +1,14 @@
+int passos(int n) {
+    int p;
+    p = 0;
+    while (n != 1) {
+        if (n % 2 == 0) n = n / 2;
+        else n = 3 * n + 1;
+        p = p + 1;
+    }
+    return p;
+}
+
+int main() {
+    return passos(27) * 100 + passos(1) * 10 + passos(7);
+}

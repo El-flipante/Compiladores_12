@@ -1,0 +1,31 @@
+// Vetores e escalares globais lidos e escritos por varias funcoes.
+int tabela[5] = {10, 20, 30};
+int contador;
+int acum;
+
+void incrementa() {
+    contador = contador + 1;
+}
+
+void preenche(int valor) {
+    for (int i = 0; i < 5; i = i + 1) {
+        tabela[i] = valor + i;
+        incrementa();
+    }
+}
+
+int soma_tabela() {
+    int s;
+    s = 0;
+    for (int i = 0; i < 5; i = i + 1) s = s + tabela[i];
+    return s;
+}
+
+int main() {
+    int antes;
+    antes = soma_tabela();
+    preenche(100);
+    acum = soma_tabela();
+    tabela[2] = tabela[0] + tabela[4];
+    return antes * 100000 + acum * 10 + contador + tabela[2] * 1000000;
+}

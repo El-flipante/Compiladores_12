@@ -1,0 +1,103 @@
+=== CODIGO FINAL (ASSEMBLY RISC-V) ===
+# Assembly RISC-V (RV32IM, ABI ilp32) gerado a partir do codigo intermediario
+# Montar:  riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -nostdlib -static prog.s -o prog
+# Executar: qemu-riscv32 ./prog   (codigo de saida = valor retornado por main)
+
+    .text
+    .globl _start
+_start:
+    jal ra, main
+    li a7, 93
+    ecall
+
+    .globl dobra
+dobra:
+    addi sp, sp, -16
+    sw ra, 12(sp)
+    sw s0, 8(sp)
+    addi s0, sp, 16
+    sb a0, -12(s0)
+    lb t0, -12(s0)
+    lb t1, -12(s0)
+    add t0, t0, t1
+    sw t0, -16(s0)
+    lw a0, -16(s0)
+    slli a0, a0, 24
+    srai a0, a0, 24
+.Lret_dobra:
+    lw ra, -4(s0)
+    mv sp, s0
+    lw s0, -8(sp)
+    ret
+
+    .globl main
+main:
+    addi sp, sp, -48
+    sw ra, 44(sp)
+    sw s0, 40(sp)
+    addi s0, sp, 48
+    li t0, 97
+    li t1, 0
+    addi t2, s0, -12
+    add t2, t2, t1
+    sb t0, 0(t2)
+    li t0, 98
+    li t1, 1
+    addi t2, s0, -12
+    add t2, t2, t1
+    sb t0, 0(t2)
+    li t0, 0
+    li t1, 2
+    addi t2, s0, -12
+    add t2, t2, t1
+    sb t0, 0(t2)
+    li t0, 7
+    li t1, 0
+    slli t1, t1, 2
+    addi t2, s0, -20
+    add t2, t2, t1
+    sw t0, 0(t2)
+    li t0, 8
+    li t1, 1
+    slli t1, t1, 2
+    addi t2, s0, -20
+    add t2, t2, t1
+    sw t0, 0(t2)
+    li t1, 0
+    addi t2, s0, -12
+    add t2, t2, t1
+    lb t0, 0(t2)
+    sw t0, -24(s0)
+    lw a0, -24(s0)
+    jal ra, dobra
+    sw a0, -28(s0)
+    lw t0, -28(s0)
+    li t1, 2
+    addi t2, s0, -12
+    add t2, t2, t1
+    sb t0, 0(t2)
+    li t1, 0
+    slli t1, t1, 2
+    addi t2, s0, -20
+    add t2, t2, t1
+    lw t0, 0(t2)
+    sw t0, -32(s0)
+    lw t0, -32(s0)
+    li t1, 1
+    slli t1, t1, 2
+    addi t2, s0, -20
+    add t2, t2, t1
+    sw t0, 0(t2)
+    li t1, 1
+    slli t1, t1, 2
+    addi t2, s0, -20
+    add t2, t2, t1
+    lw t0, 0(t2)
+    sw t0, -36(s0)
+    lw a0, -36(s0)
+.Lret_main:
+    lw ra, -4(s0)
+    mv sp, s0
+    lw s0, -8(sp)
+    ret
+======================================

@@ -1,0 +1,25 @@
+// Divisao e resto truncam em direcao a zero (o resto tem o sinal do dividendo).
+int main() {
+    int a;
+    int b;
+    int r;
+    r = 0;
+    a = -7;
+    b = 2;
+    r = r * 17 + a / b;
+    r = r * 17 + a % b;
+    a = 7;
+    b = -2;
+    r = r * 17 + a / b;
+    r = r * 17 + a % b;
+    a = -7;
+    b = -2;
+    r = r * 17 + a / b;
+    r = r * 17 + a % b;
+    a = 0;
+    b = 5;
+    r = r * 17 + a / b;
+    r = r * 17 + a % b;
+    r = r * 17 + (-9 / 3) + (-10 % 3);
+    return r;
+}

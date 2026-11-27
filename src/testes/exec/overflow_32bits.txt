@@ -1,0 +1,13 @@
+// Aritmetica de 32 bits com complemento de dois: estouro "da a volta".
+int main() {
+    int maior;
+    int r;
+    maior = 2147483647;
+    r = 0;
+    r = r * 7 + (maior + 1) / 65536;
+    r = r * 7 + (maior + maior);
+    r = r * 7 + 65536 * 65536;
+    r = r * 7 + (maior * 3);
+    r = r * 7 + (0 - maior - 2);
+    return r;
+}

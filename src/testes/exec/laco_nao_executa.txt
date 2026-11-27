@@ -1,0 +1,9 @@
+// Condicao falsa desde o inicio: o corpo nunca roda.
+int main() {
+    int n;
+    n = 5;
+    while (n < 0) n = n + 100;
+    for (int i = 10; i < 0; i = i + 1) n = n + 1000;
+    if (n < 0) n = n + 1000000;
+    return n;
+}

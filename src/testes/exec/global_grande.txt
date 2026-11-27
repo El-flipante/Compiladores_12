@@ -1,0 +1,16 @@
+// Vetores globais grandes (.space) e globais char.
+int tabela[2000];
+char letras[301] = {'x', 'y'};
+char marca;
+int total;
+
+int main() {
+    for (int i = 0; i < 2000; i = i + 1) tabela[i] = i % 7;
+    for (int i = 0; i < 2000; i = i + 1) total = total + tabela[i];
+    marca = 'm';
+    letras[300] = marca;
+    if (letras[1] == 'y') total = total + 100000;
+    if (letras[300] == 'm') total = total + 200000;
+    if (letras[2] == '\0') total = total + 400000;
+    return total;
+}

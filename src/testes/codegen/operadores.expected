@@ -1,0 +1,131 @@
+=== CODIGO FINAL (ASSEMBLY RISC-V) ===
+# Assembly RISC-V (RV32IM, ABI ilp32) gerado a partir do codigo intermediario
+# Montar:  riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -nostdlib -static prog.s -o prog
+# Executar: qemu-riscv32 ./prog   (codigo de saida = valor retornado por main)
+
+    .text
+
+    .globl ops
+ops:
+    addi sp, sp, -96
+    sw ra, 92(sp)
+    sw s0, 88(sp)
+    addi s0, sp, 96
+    sw a0, -12(s0)
+    sw a1, -16(s0)
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    add t0, t0, t1
+    sw t0, -24(s0)
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    mul t0, t0, t1
+    sw t0, -28(s0)
+    lw t0, -28(s0)
+    lw t1, -12(s0)
+    div t0, t0, t1
+    sw t0, -32(s0)
+    lw t0, -32(s0)
+    lw t1, -16(s0)
+    rem t0, t0, t1
+    sw t0, -36(s0)
+    lw t0, -24(s0)
+    lw t1, -36(s0)
+    sub t0, t0, t1
+    sw t0, -40(s0)
+    lw t0, -40(s0)
+    sw t0, -20(s0)
+    lw t0, -20(s0)
+    neg t0, t0
+    sw t0, -44(s0)
+    lw t0, -44(s0)
+    sw t0, -20(s0)
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    slt t0, t0, t1
+    sw t0, -48(s0)
+    lw t0, -48(s0)
+    beqz t0, .L1
+    lw t0, -20(s0)
+    li t1, 1
+    add t0, t0, t1
+    sw t0, -52(s0)
+    lw t0, -52(s0)
+    sw t0, -20(s0)
+.L1:
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    slt t0, t1, t0
+    sw t0, -56(s0)
+    lw t0, -56(s0)
+    beqz t0, .L2
+    lw t0, -20(s0)
+    li t1, 2
+    add t0, t0, t1
+    sw t0, -60(s0)
+    lw t0, -60(s0)
+    sw t0, -20(s0)
+.L2:
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    slt t0, t1, t0
+    xori t0, t0, 1
+    sw t0, -64(s0)
+    lw t0, -64(s0)
+    beqz t0, .L3
+    lw t0, -20(s0)
+    li t1, 3
+    add t0, t0, t1
+    sw t0, -68(s0)
+    lw t0, -68(s0)
+    sw t0, -20(s0)
+.L3:
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    slt t0, t0, t1
+    xori t0, t0, 1
+    sw t0, -72(s0)
+    lw t0, -72(s0)
+    beqz t0, .L4
+    lw t0, -20(s0)
+    li t1, 4
+    add t0, t0, t1
+    sw t0, -76(s0)
+    lw t0, -76(s0)
+    sw t0, -20(s0)
+.L4:
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    xor t0, t0, t1
+    seqz t0, t0
+    sw t0, -80(s0)
+    lw t0, -80(s0)
+    beqz t0, .L5
+    lw t0, -20(s0)
+    li t1, 5
+    add t0, t0, t1
+    sw t0, -84(s0)
+    lw t0, -84(s0)
+    sw t0, -20(s0)
+.L5:
+    lw t0, -12(s0)
+    lw t1, -16(s0)
+    xor t0, t0, t1
+    snez t0, t0
+    sw t0, -88(s0)
+    lw t0, -88(s0)
+    beqz t0, .L6
+    lw t0, -20(s0)
+    li t1, 6
+    add t0, t0, t1
+    sw t0, -92(s0)
+    lw t0, -92(s0)
+    sw t0, -20(s0)
+.L6:
+    lw a0, -20(s0)
+.Lret_ops:
+    lw ra, -4(s0)
+    mv sp, s0
+    lw s0, -8(sp)
+    ret
+======================================

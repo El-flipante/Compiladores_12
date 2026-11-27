@@ -39,9 +39,15 @@ test-lexer:
 test-ast-output: $(EXEC)
 	sh testes/testar_ast.sh
 
-test: test-symtab test-lexer test-ast-output test-complementares test-ir
+test-codegen: $(EXEC)
+	sh testes/testar_codegen.sh
+
+test-exec: $(EXEC) testes/rv32sim.c
+	sh testes/testar_execucao.sh
+
+test: test-symtab test-lexer test-ast-output test-complementares test-ir test-codegen test-exec
 
 clean:
 	rm -f $(EXEC) $(BISON_C) $(BISON_H) $(FLEX_C) testes/test_symtab testes/test_ast
 
-.PHONY: all test test-symtab test-ast test-lexer test-ast-output test-complementares test-ir clean
+.PHONY: all test test-symtab test-ast test-lexer test-ast-output test-complementares test-ir test-codegen test-exec clean

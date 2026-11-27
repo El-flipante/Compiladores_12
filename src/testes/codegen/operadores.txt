@@ -1,0 +1,12 @@
+int ops(int a, int b) {
+    int r;
+    r = a + b - a * b / a % b;
+    r = -r;
+    if (a < b) r = r + 1;
+    if (a > b) r = r + 2;
+    if (a <= b) r = r + 3;
+    if (a >= b) r = r + 4;
+    if (a == b) r = r + 5;
+    if (a != b) r = r + 6;
+    return r;
+}

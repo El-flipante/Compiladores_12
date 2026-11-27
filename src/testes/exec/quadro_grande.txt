@@ -1,0 +1,23 @@
+// Quadro de pilha maior que 2048 bytes: os deslocamentos nao cabem mais nos
+// 12 bits das instrucoes lw/sw e o gerador precisa calcular os enderecos.
+int usa(int n) {
+    int pequeno[3] = {n, n + 1, n + 2};
+    return pequeno[0] + pequeno[1] + pequeno[2];
+}
+
+int main() {
+    int grande[700];
+    char bytes[2500];
+    int depois;
+    int r;
+    for (int i = 0; i < 700; i = i + 1) grande[i] = i * 3 - 100;
+    for (int i = 0; i < 2500; i = i + 1) bytes[i] = 'a';
+    bytes[2499] = 'z';
+    bytes[1] = 'b';
+    depois = usa(10);
+    r = grande[0] + grande[1] * 7 + grande[350] + grande[699] * 3 + depois;
+    if (bytes[2499] == 'z') r = r + 1000000;
+    if (bytes[1] == 'b') r = r + 2000000;
+    if (bytes[2498] == 'a') r = r + 4000000;
+    return r;
+}

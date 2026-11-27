@@ -1,0 +1,16 @@
+// 12 argumentos (o maximo aceito), todos expressoes: os temporarios dos
+// argumentos ainda estao vivos enquanto os 4 ultimos sao gravados na pilha.
+// Se a area de argumentos de saida nao fosse reservada no quadro, essas
+// gravacoes sobrescreveriam os temporarios ainda nao lidos.
+int soma12(int a, int b, int c, int d, int e, int f, int g, int h,
+           int i, int j, int k, int l) {
+    return a + b * 2 + c * 3 + d * 4 + e * 5 + f * 6 + g * 7 + h * 8
+         + i * 9 + j * 10 + k * 11 + l * 12;
+}
+
+int main() {
+    int a;
+    a = 100;
+    return soma12(a + 1, a + 2, a + 3, a + 4, a + 5, a + 6, a + 7, a + 8,
+                  a + 9, a + 10, a + 11, a + 12);
+}
