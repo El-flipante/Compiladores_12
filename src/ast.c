@@ -120,6 +120,7 @@ ASTNode* ast_new_decl(const char *id, DataType data_type) {
     node->decl.data_type = data_type;
     node->decl.is_array = 0;
     node->decl.array_size = 0;
+    node->decl.init_list = NULL;
     return node;
 }
 
@@ -150,6 +151,14 @@ ASTNode* ast_new_seq(ASTNode *stmt1, ASTNode *stmt2) {
     node->expr_type = TYPE_VOID;
     node->seq.stmt1 = stmt1;
     node->seq.stmt2 = stmt2;
+    return node;
+}
+
+ASTNode* ast_new_block(ASTNode *body) {
+    ASTNode *node = (ASTNode*) malloc(sizeof(ASTNode));
+    node->type = AST_BLOCK;
+    node->expr_type = TYPE_VOID;
+    node->block.body = body;
     return node;
 }
 
@@ -225,6 +234,10 @@ void ast_print(ASTNode *node, int level) {
     if (node->type == AST_SEQ) {
         ast_print(node->seq.stmt1, level);
         ast_print(node->seq.stmt2, level);
+        return;
+    }
+    if (node->type == AST_BLOCK) {   // o bloco nao altera a impressao da arvore
+        ast_print(node->block.body, level);
         return;
     }
     if (node->type == AST_PARAM_LIST) {
@@ -305,15 +318,17 @@ void ast_print(ASTNode *node, int level) {
             ast_print(node->for_stmt.body, level + 2);
             break;
         case AST_FUNC_DECL:
-            printf("FUNC_DECL(%s)\n", node->func_decl.id);
+            printf("%s(%s)\n", node->func_decl.body ? "FUNC_DECL" : "FUNC_PROTO", node->func_decl.id);
             if (node->func_decl.params) {
                 print_indent(level + 1);
                 printf("PARAMS:\n");
                 ast_print(node->func_decl.params, level + 2);
             }
-            print_indent(level + 1);
-            printf("BODY:\n");
-            ast_print(node->func_decl.body, level + 2);
+            if (node->func_decl.body) {
+                print_indent(level + 1);
+                printf("BODY:\n");
+                ast_print(node->func_decl.body, level + 2);
+            }
             break;
         case AST_FUNC_CALL:
             printf("FUNC_CALL(%s)\n", node->func_call.id);
@@ -363,6 +378,7 @@ void ast_free(ASTNode *node) {
             ast_free(node->array_access.index_expr);
             break;
         case AST_SEQ:       ast_free(node->seq.stmt1); ast_free(node->seq.stmt2); break;
+        case AST_BLOCK:     ast_free(node->block.body); break;
         case AST_IF:
             ast_free(node->if_stmt.cond);
             ast_free(node->if_stmt.if_branch);

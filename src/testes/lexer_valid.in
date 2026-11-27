@@ -1,0 +1,7 @@
+// comentários e espaços devem ser ignorados
+int char bool float void if else for while return
+nome _privado var2
+12345
+'a' '\n' '\\' '\''
+"texto" "com escape: \n e aspas: \""
++ - * / % <= >= == != < > ( ) [ ] { } ; = ,

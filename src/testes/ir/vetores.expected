@@ -1,0 +1,75 @@
+=== CODIGO INTERMEDIARIO (TRES ENDERECOS) ===
+global_array tab[5] : int
+func soma : int
+    formal n : int
+    decl r : int
+    r = 0
+    decl i : int
+    i = 0
+  L1:
+    t1 = i < n
+    if_false t1 goto L2
+    t2 = tab[i]
+    t3 = r + t2
+    r = t3
+    t4 = i + 1
+    i = t4
+    goto L1
+  L2:
+    return r
+endfunc
+func main : int
+    array loc[6] : int
+    loc[0] = 1
+    loc[1] = 2
+    loc[2] = 3
+    loc[3] = 0
+    loc[4] = 0
+    loc[5] = 0
+    array cs[3] : char
+    cs[0] = 97
+    cs[1] = 98
+    cs[2] = 0
+    decl ch : char
+    t1 = cs[1]
+    ch = t1
+    t2 = ch == 98
+    if_false t2 goto L3
+    loc[0] = 1
+  L3:
+    t3 = cs[2]
+    t4 = t3 == 0
+    if_false t4 goto L4
+    t5 = loc[2]
+    t6 = t5 + 50
+    loc[2] = t6
+  L4:
+    decl i : int
+    i = 0
+  L5:
+    t7 = i < 5
+    if_false t7 goto L6
+    t8 = i * i
+    tab[i] = t8
+    t9 = i + 1
+    i = t9
+    goto L5
+  L6:
+    param 5
+    t10 = call soma, 1
+    loc[5] = t10
+    t11 = loc[0]
+    t12 = loc[5]
+    t13 = loc[2]
+    t14 = t12 - t13
+    loc[t11] = t14
+    t15 = loc[1]
+    t16 = loc[3]
+    t17 = t15 + t16
+    t18 = loc[4]
+    t19 = t17 + t18
+    t20 = loc[5]
+    t21 = t19 + t20
+    return t21
+endfunc
+=============================================

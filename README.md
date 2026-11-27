@@ -8,6 +8,7 @@ O projeto evoluiu e agora engloba as seguintes fases de compilação:
 - **Tabela de Símbolos:** Estrutura de dados para o gerenciamento de escopos, variáveis e tipos.
 - **Analisador Semântico:** Verificação de regras da linguagem (checagem de tipos, variáveis não declaradas, etc).
 - **Gerador de Código Intermediário:** Tradução da AST para uma representação intermediária antes da geração do Assembly final.
+- **Gerador de Código Final:** Tradução do código intermediário para Assembly RISC-V RV32IM.
 
 ---
 
@@ -64,6 +65,8 @@ Para manter a documentação principal enxuta, todos os detalhes de implementaç
 
 > 🔍 **[Acessar Documentação de Testes e Evidências](./docs/testes.md)**
 
+> 🌳 **[Ver exemplo da Árvore Sintática Abstrata (AST)](./docs/arvore-sintatica.md)**
+
 *(Abaixo, um guia de onde encontrar os arquivos de teste no repositório)*  
 ![Guia de Testes](./docs/img/guia_pastas.png)
 
@@ -74,7 +77,7 @@ Para manter a documentação principal enxuta, todos os detalhes de implementaç
 | Ferramentas | Função |
 |------------|------------|
 | C | Linguagem principal do compilador |
-| Assembly | Linguagem final do compilador |
+| Assembly RISC-V (RV32IM) | Linguagem final gerada pelo compilador |
 | Flex | Geração do Analisador Léxico |
 | Bison | Geração do Analisador Sintático  |
 | WSL | Bash para Windows |
@@ -91,7 +94,7 @@ A linguagem escolhida reconhece as seguintes categorias de tokens:
 
 ### 1.1. Palavras Reservadas (Keywords)
 As seguintes palavras são reservadas e não podem ser usadas como identificadores:
-* `int`, `char`, `void`, `return`, `if`, `else`, `for`, `while`
+* `int`, `char`, `bool`, `float`, `void`, `return`, `if`, `else`, `for`, `while`
 
 ### 1.2. Identificadores
 Nomes de variáveis e funções. 
@@ -104,7 +107,7 @@ Nomes de variáveis e funções.
 ### 1.4. Operadores e Símbolos Especiais
 | Categoria | Símbolos |
 | --- | --- |
-| Aritméticos | `+`, `-`, `*`, `/` |
+| Aritméticos | `+`, `-`, `*`, `/`, `%` |
 | Relacionais | `==`, `!=`, `<`, `>`, `<=`, `>=` |
 | Atribuição | `=` |
 | Delimitadores | `(`, `)`, `{`, `}`, `[`, `]`, `;`, `,` |
@@ -118,9 +121,10 @@ Nomes de variáveis e funções.
 ## 2. Estruturas Sintáticas
 
 ### 2.1. Declaração de Variáveis e Vetores
-Serão suportadas declarações simples (com ou sem inicialização imediata) e declarações de vetores unidimensionais de tamanho fixo.
-* **Tipos básicos:** `int x;`, `int y = 10;`, `char letra = 'a';`
-* **Vetores (Arrays):** `int numeros[10];`, `char palavra[20];` *(Nota: a inicialização de vetores no momento da declaração, como `int v[2] = {1, 2}`, não será suportada nesta versão).*
+São suportadas declarações simples e declarações de vetores unidimensionais de tamanho fixo. A atribuição de valores a variáveis simples é feita em uma instrução separada.
+* **Tipos:** a gramática reconhece `int`, `char`, `bool` e `float` para variáveis e parâmetros; `void` pode ser usado como tipo de retorno de função. A geração de Assembly usa instruções inteiras RISC-V; operações de ponto flutuante ainda não são implementadas.
+* **Variáveis:** `int x;` seguido, por exemplo, de `x = 10;`.
+* **Vetores:** `int numeros[10];` ou `int v[3] = {1, 2, 3};`. Inicializadores globais devem ser constantes.
 
 ### 2.2. Estruturas de Controle de Fluxo
 * **Condicionais:** Estrutura `if` e `if-else`.
@@ -140,8 +144,10 @@ O código abaixo demonstra um programa válido calculando um fatorial:
 ```c
 // Programa que calcula o fatorial de 5
 int main() {
-    int n = 5;
-    int resultado = 1;
+    int n;
+    int resultado;
+    n = 5;
+    resultado = 1;
     
     while (n > 0) {
         resultado = resultado * n;
@@ -156,52 +162,114 @@ int main() {
 
 # Como Executar o Projeto
 
-Antes de iniciar, certifique-se de possuir instalados: 
-* **Bison** e **Flex** (para geração dos analisadores léxico e sintático)
-* **GCC** (Compilador C)
-* **Make** (Ferramenta de automação de compilação)
-* **WSL** (caso use Windows) ou ambiente **Linux**[cite: 8]
+## Requisitos
 
----
+Antes de iniciar, instale as ferramentas abaixo:
 
-## 1. Clonar o Repositório e Acessar o Diretório
+* **GCC** (compilador C)
+* **Flex** (gerador do analisador léxico)
+* **Bison** (gerador do analisador sintático)
+* **Make** (automação da compilação)
+* Em Windows, recomenda-se **WSL/Linux**. O MSYS2 também pode compilar o projeto, mas os testes que comparam saídas de texto podem encontrar diferenças de finais de linha (CRLF/LF).
+
+## 1. Compilar o Compilador
+
+Se ainda não tiver o repositório, clone-o e entre na pasta do código-fonte:
 
 ```bash
 git clone https://github.com/El-flipante/Compiladores_12
-cd Compiladores_12/Compilador_grupo_12
+cd Compiladores_12
 ```
 
-## 2. Compilar o Projeto
-O projeto agora conta com um Makefile para gerir todas as dependências automaticamente. Para compilar o analisador léxico, sintático, a AST e a Tabela de Símbolos, basta executar na raiz do código:
-```Bash
+Se o repositório já estiver na sua máquina, entre na pasta `src`. Depois compile o projeto:
+
+```bash
+cd src
 make
 ```
-(Dica: Caso queira limpar os ficheiros gerados em compilações anteriores, utilize o comando make clean).
 
-## 3. Executar o Compilador
-Após a compilação, será gerado um executável. Para executá-lo passando um ficheiro de teste como entrada, utilize o redirecionamento do terminal:
+O Makefile executa Bison e Flex para gerar `parser.tab.c`, `parser.tab.h` e `lex.yy.c`, e depois compila esses arquivos junto com os módulos da AST, tabela de símbolos, código intermediário e Assembly final. O executável gerado é `parser` (ou `parser.exe` em ambientes Windows).
 
-```Bash
-./parser < testes/teste_sintatico.txt
+## 2. Compilar um Programa de Entrada
+
+O compilador lê o programa pela entrada padrão. Crie um arquivo, por exemplo `programa.c`, com código pertencente ao subconjunto da linguagem aceito pelo projeto:
+
+```c
+int soma(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int resultado;
+    resultado = soma(20, 22);
+    return resultado;
+}
 ```
+
+Execute o compilador redirecionando o arquivo como entrada:
+
+```bash
+./parser < programa.c
+```
+
+No MSYS2, use `./parser.exe < programa.c` caso o shell não encontre o executável sem a extensão `.exe`.
+
+O compilador imprime a AST, a tabela de símbolos, o código intermediário de três endereços e, ao final, o Assembly RISC-V RV32IM. Para guardar toda essa saída em um arquivo:
+
+```bash
+./parser < programa.c > saida_compilador.txt
+```
+
+O Assembly final estará no último bloco da saída. Se houver erros léxicos, sintáticos ou semânticos, o compilador mostra os diagnósticos e não gera o código intermediário nem o Assembly.
+
+> **Observação:** o projeto implementa um subconjunto de C, não a linguagem C completa. O código de entrada deve seguir as construções descritas neste README; recursos como bibliotecas (`#include`), ponteiros e funções de entrada/saída não fazem parte da gramática atual.
+
+## 3. Executar os Testes
+
+Na pasta `src`, execute a suíte automatizada:
+
+```bash
+make test
+```
+
+O alvo `make test` executa os seguintes grupos:
+
+* **Tabela de símbolos (`test-symtab`):** verifica inserção e busca de variáveis, rejeição de nomes duplicados no mesmo escopo e sombreamento de um nome em um escopo interno.
+* **Analisador léxico (`test-lexer`):** compara a sequência de tokens produzida para uma entrada válida e verifica diagnósticos para identificador iniciado por número, caractere inválido e escape inválido em literal de caractere.
+* **AST (`test-ast-output`):** compila uma entrada simples e confere se a árvore impressa contém declaração, atribuição e operandos esperados, além de verificar a precedência de multiplicação sobre soma.
+* **Casos complementares (`test-complementares`):** verifica um programa válido com protótipos e definições de função, chamadas, tipos, escopos, vetores, operadores e laços. Também confere diagnósticos semânticos, erro léxico e recuperação após erro sintático.
+* **Código intermediário (`test-ir`):** compara o TAC gerado com saídas esperadas para casos de chamadas aninhadas, expressões, operadores relacionais, laços, vetores, escopos, variáveis globais e funções `void`. Verifica também que erros semânticos impedem a geração do TAC.
+
+Para executar apenas um grupo, use, por exemplo, `make test-lexer`, `make test-ir`, `make test-ast-output`, `make test-complementares` ou `make test-symtab`.
+
+O Makefile também define o alvo `make test-ast`, mas ele não faz parte de `make test`. No estado atual, `testes/test_ast.c` contém verificações da tabela de símbolos; por isso, a cobertura da AST descrita acima vem do teste integrado `test-ast-output`.
+
+> **Cobertura atual:** a suíte automatizada verifica o compilador até a geração do TAC, mas ainda não possui testes que comparem o Assembly RISC-V produzido pelo `codegen` com saídas esperadas. A geração de Assembly pode ser observada executando o compilador com um programa de entrada, conforme a seção anterior.
 
 ## Estrutura do Projeto
-Abaixo está a organização atualizada dos diretórios e ficheiros do projeto:
-```Plaintext
+
+```text
 Compiladores_12/
-├── Compilador_grupo_12/
-│   ├── testes/         # Scripts de teste (.sh) e ficheiros de texto para validação
-│   ├── ast.c           # Implementação da Árvore Sintática Abstrata
-│   ├── ast.h           # Cabeçalhos da Árvore Sintática Abstrata
-│   ├── lexer.l         # Regras de análise léxica (Flex)
-│   ├── Makefile        # Script de automação para compilação
-│   ├── parser.y        # Regras gramaticais e sintáticas (Bison)
-│   ├── symtab.c        # Implementação da Tabela de Símbolos e analisador semântico
-│   └── symtab.h        # Cabeçalhos da Tabela de Símbolos
-├── docs/               # Documentação detalhada, guia de testes e evidências visuais
-├── professor/          # Material e referências da disciplina
-└── README.md           # Este ficheiro
+├── README.md                  # Visão geral, linguagem e instruções de uso
+├── docs/                      # Documentação, testes e evidências do projeto
+├── professor/                 # Materiais e referências da disciplina
+└── src/
+    ├── Makefile               # Compilação e execução dos testes
+    ├── lexer.l                # Regras do analisador léxico (Flex)
+    ├── parser.y               # Gramática, AST e ações semânticas (Bison)
+    ├── ast.c / ast.h          # Definição, construção e impressão da AST
+    ├── symtab.c / symtab.h    # Tabela de símbolos e controle de escopos
+    ├── ir.c / ir.h            # Geração e impressão do código intermediário (TAC)
+    ├── codegen.c / codegen.h  # Geração do Assembly RISC-V RV32IM
+    └── testes/
+        ├── test_*.c           # Testes unitários da AST, lexer e tabela de símbolos
+        ├── testar_*.sh        # Scripts dos testes automatizados
+        ├── complementares/    # Entradas de teste léxicas, sintáticas e semânticas
+        ├── historico/         # Entradas de testes anteriores
+        └── ir/                # Casos de teste e saídas esperadas do TAC
 ```
+
+Os arquivos `parser.tab.c`, `parser.tab.h` e `lex.yy.c` são gerados durante a compilação e não precisam ser editados manualmente.
 
 # Licença
 

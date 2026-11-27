@@ -1,0 +1,6 @@
+int add(int a, int b) { return a + b; }
+int mul(int a, int b) { return a * b; }
+int sub3(int a, int b, int c) { return a - b - c; }
+int main() {
+    return sub3(add(mul(2, 3), 4), add(1, mul(1, 2)), mul(add(1, 1), 1));
+}
