@@ -572,8 +572,15 @@ AsmProgram *codegen_generate(const IRProgram *ir) {
     AsmProgram *code = (AsmProgram *) calloc(1, sizeof(AsmProgram));
     if (!code) { fprintf(stderr, "[ERRO CODIGO FINAL] memoria insuficiente.\n"); exit(1); }
 
-    out = open_memstream(&code->text, &code->length);
-    if (!out) { fprintf(stderr, "[ERRO CODIGO FINAL] memoria insuficiente.\n"); exit(1); }
+    /* Use only standard C file operations; open_memstream is a GNU extension
+       and is unavailable in some Windows toolchains (including MinGW). */
+    out = tmpfile();
+    if (!out) {
+        fprintf(stderr, "[ERRO CODIGO FINAL] nao foi possivel criar arquivo temporario.\n");
+        code->text = (char *) calloc(1, 1);
+        code->errors = 1;
+        return code;
+    }
     errors = 0;
     param_index = 0;
 
@@ -587,9 +594,42 @@ AsmProgram *codegen_generate(const IRProgram *ir) {
         gen_text(ir);
     }
 
-    fclose(out);                      // fecha o fluxo: text e length passam a ser validos
+    if (fflush(out) != 0 || fseek(out, 0, SEEK_END) != 0) {
+        fprintf(stderr, "[ERRO CODIGO FINAL] falha ao preparar a saida Assembly.\n");
+        errors++;
+    } else {
+        long file_length = ftell(out);
+        if (file_length < 0 || (unsigned long) file_length >= (unsigned long) ((size_t) -1)) {
+            fprintf(stderr, "[ERRO CODIGO FINAL] tamanho invalido da saida Assembly.\n");
+            errors++;
+        } else {
+            size_t length = (size_t) file_length;
+            char *text = (char *) malloc(length + 1);
+            if (!text) {
+                fprintf(stderr, "[ERRO CODIGO FINAL] memoria insuficiente.\n");
+                errors++;
+            } else {
+                rewind(out);
+                size_t read_count = fread(text, 1, length, out);
+                if (read_count != length || ferror(out)) {
+                    fprintf(stderr, "[ERRO CODIGO FINAL] falha ao ler a saida Assembly.\n");
+                    free(text);
+                    errors++;
+                } else {
+                    text[length] = '\0';
+                    code->text = text;
+                    code->length = length;
+                }
+            }
+        }
+    }
+    if (fclose(out) != 0) {
+        fprintf(stderr, "[ERRO CODIGO FINAL] falha ao fechar a saida Assembly.\n");
+        errors++;
+    }
     out = NULL;
     code->errors = errors;
+    if (!code->text) code->text = (char *) calloc(1, 1);
 
     vt_free(&globals);
     vt_free(&locals);
@@ -601,7 +641,7 @@ AsmProgram *codegen_generate(const IRProgram *ir) {
 /* ------------------------------------------------------------------ */
 
 void codegen_print(const AsmProgram *code, FILE *dst) {
-    if (!code) return;
+    if (!code || !code->text || !dst) return;
     fputs(code->text, dst);
 }
 
