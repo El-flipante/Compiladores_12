@@ -4,3 +4,6 @@
 /src/testes/test_symtab.exe
 /src/testes/test_ast
 /src/testes/test_ast.exe
+/src/lex.yy.c
+/src/parser.tab.c
+/src/parser.tab.h
