@@ -1,0 +1,6 @@
+/src/parser
+/src/parser.exe
+/src/testes/test_symtab
+/src/testes/test_symtab.exe
+/src/testes/test_ast
+/src/testes/test_ast.exe
