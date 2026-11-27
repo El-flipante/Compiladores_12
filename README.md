@@ -1,6 +1,13 @@
 # Compilador de C -> Assembly
 
-Este documento descreve as especificações do subconjunto da linguagem C que será aceito pelo nosso compilador, cujo objetivo final é a tradução para código Assembly. O documento também apresenta os testes realizados até o momento atual. No versionamento vigente encontram-se implementados o analizador léxico (a princípio completo, mas sujeito a revisões) e o analisador sintático completo.
+Este documento descreve as especificações do subconjunto da linguagem C aceito pelo nosso compilador, cujo objetivo final é a tradução para código Assembly. 
+
+O projeto evoluiu e agora engloba as seguintes fases de compilação:
+- **Analisador Léxico e Sintático:** Reconhecimento de tokens e estruturação gramatical.
+- **Árvore Sintática Abstrata (AST):** Estruturação do código em uma árvore para facilitar a travessia e análise.
+- **Tabela de Símbolos:** Estrutura de dados para o gerenciamento de escopos, variáveis e tipos.
+- **Analisador Semântico:** Verificação de regras da linguagem (checagem de tipos, variáveis não declaradas, etc).
+- **Gerador de Código Intermediário:** Tradução da AST para uma representação intermediária antes da geração do Assembly final.
 
 ---
 
@@ -37,7 +44,6 @@ Este documento descreve as especificações do subconjunto da linguagem C que se
 <sub><b>João Rolim</b></sub><br>
 </a>
 </td>
-</tr>
 
 <td align="center">
 <a href="https://github.com/LucasPeixotoRodrigues">
@@ -45,10 +51,21 @@ Este documento descreve as especificações do subconjunto da linguagem C que se
 <sub><b>Lucas Peixoto</b></sub><br>
 </a>
 </td>
+</tr>
 
 </table>
 
 </div>
+
+---
+## 📂 Evidências e Testes
+
+Para manter a documentação principal enxuta, todos os detalhes de implementação, casos de teste e evidências de validação foram movidos para o diretório `/docs`.
+
+> 🔍 **[Acessar Documentação de Testes e Evidências](./docs/testes.md)**
+
+*(Abaixo, um guia de onde encontrar os arquivos de teste no repositório)*  
+![Guia de Testes](./docs/img/guia_pastas.png)
 
 ---
 
@@ -139,218 +156,53 @@ int main() {
 
 # Como Executar o Projeto
 
-## Pré-requisitos
-
 Antes de iniciar, certifique-se de possuir instalados: 
-
-Bison, Flex, GCC, WSL(caso use Windows)/Linux 
-
-
+* **Bison** e **Flex** (para geração dos analisadores léxico e sintático)
+* **GCC** (Compilador C)
+* **Make** (Ferramenta de automação de compilação)
+* **WSL** (caso use Windows) ou ambiente **Linux**[cite: 8]
 
 ---
 
-## 1. Clonar o Repositório
+## 1. Clonar o Repositório e Acessar o Diretório
 
 ```bash
 git clone https://github.com/El-flipante/Compiladores_12
-
-cd Compiladores_12
+cd Compiladores_12/Compilador_grupo_12
 ```
 
----
+## 2. Compilar o Projeto
+O projeto agora conta com um Makefile para gerir todas as dependências automaticamente. Para compilar o analisador léxico, sintático, a AST e a Tabela de Símbolos, basta executar na raiz do código:
+```Bash
+make
+```
+(Dica: Caso queira limpar os ficheiros gerados em compilações anteriores, utilize o comando make clean).
 
-## 2. Compilar o analizador léxico
+## 3. Executar o Compilador
+Após a compilação, será gerado um executável. Para executá-lo passando um ficheiro de teste como entrada, utilize o redirecionamento do terminal:
 
-```bash
-flex lexer.l
+```Bash
+./parser < testes/teste_sintatico.txt
 ```
 
----
-
-## 3. Compilar o analizador sintático
-
-```bash
-bison -d parser.y
-```
-## 4. Compilar tudo
-
-```bash
-gcc -o compilador parser.tab.c lexer.yy.c -lfl
-```
----
-## 5. Executar o compilador
-``` bash
-./compilador
-```
 ## Estrutura do Projeto
-
-```text
-.Compiladores_12
-├── Professor
-├── README.md
-├── parser.y
-├── lexer.l
-```
-# Teste
-Foram implementados testes para verificar o funcionamento do analisador léxico e sintático, contemplando operações aritméticas, números negativos, uso de parênteses, precedência de operadores, divisão por zero e entradas inválidas.
-
-Os testes foram divididos em **casos válidos** e **casos inválidos**, permitindo verificar tanto o reconhecimento correto das expressões quanto o tratamento de erros.
-
-### 1. Testes de expressões aritméticas válidas
-
-Os testes a seguir verificam operações básicas de soma, subtração, multiplicação e divisão.
-
-```text
-5 + 3;
-5 - 3;
-10 * 3;
-10 * 10;
-10 / 2;
-0 / 5;
+Abaixo está a organização atualizada dos diretórios e ficheiros do projeto:
+```Plaintext
+Compiladores_12/
+├── Compilador_grupo_12/
+│   ├── testes/         # Scripts de teste (.sh) e ficheiros de texto para validação
+│   ├── ast.c           # Implementação da Árvore Sintática Abstrata
+│   ├── ast.h           # Cabeçalhos da Árvore Sintática Abstrata
+│   ├── lexer.l         # Regras de análise léxica (Flex)
+│   ├── Makefile        # Script de automação para compilação
+│   ├── parser.y        # Regras gramaticais e sintáticas (Bison)
+│   ├── symtab.c        # Implementação da Tabela de Símbolos e analisador semântico
+│   └── symtab.h        # Cabeçalhos da Tabela de Símbolos
+├── docs/               # Documentação detalhada, guia de testes e evidências visuais
+├── professor/          # Material e referências da disciplina
+└── README.md           # Este ficheiro
 ```
 
-### 2. Testes com números negativos
-
-Verificam o reconhecimento do operador unário de negação e sua utilização em operações aritméticas.
-
-```text
-10 * -5;
--6 * 3;
-10 / -2;
--15 / 3;
--15 + 1*4;
--15 - 1*4;
-```
-
-### 3. Testes com números negativos entre parênteses
-
-Verificam o tratamento de valores negativos quando utilizados dentro de expressões agrupadas.
-
-```text
-10 * (-5);
-10 / (-2);
-(-6) * 3;
-(-15) / 3;
-(-15) - 1*4;
-(-15) + 1*4;
-```
-
-### 4. Testes de precedência e associação de operadores
-
-Verificam se o analisador respeita corretamente a precedência dos operadores aritméticos e o agrupamento definido pelos parênteses.
-
-```text
-4 - 3*15;
--15 - 1*4;
-(-15) - 1*4;
-(-15 - 4)*3;
-((-15) - 4)*3;
--(15 - 5)*3;
--15 + 1*4;
-(-15) + 1*4;
-10 / (5-3);
-10 / (1*5);
--(14*33);
-```
-
-### 5. Testes com operador de módulo
-
-Verificam o reconhecimento e o funcionamento do operador `%`.
-
-```text
-3 % 14;
-14 % 3;
-```
-
-### 6. Testes de operadores unários
-
-Verificam a utilização isolada dos operadores `+` e `-` como operadores unários.
-
-```text
-+ 33;
-- 45;
-- 33;
-```
-
-### 7. Teste de divisão por zero
-
-O teste abaixo verifica o comportamento do compilador diante de uma operação de divisão por zero.
-
-```text
-5 / 0;
-```
-a saida de erro específica desse teste será implementada junto com o analisador semântico
-### 8. Testes de entradas inválidas
-
-Os casos abaixo foram utilizados para verificar o tratamento de caracteres, operadores e estruturas que não pertencem à linguagem definida.
-
-#### 8.1 Caracteres inválidos
-
-```text
-@;
-.
-.
-22 ¨ 44;
-700 @ 14;
-```
-
-#### 8.2 Identificadores ou palavras não reconhecidas
-
-```text
-x;
-y - 14;
-14 * z;
-teste;
-123erro;
-554aiaiai;
-```
-
-#### 8.3 Operadores ou símbolos não suportados
-
-```text
-15 = 60;
-15 = 60/2;
-% 14;
-* 15;
-/ 22;
-11 - 15.
-```
-
-#### 8.4 Expressões incompletas ou estruturalmente inválidas
-
-```text
-1
-2
-3
-
-+ 10;
-
-1
-
-(114*3;
-114*3);
-
-44 55 73;
-
-2 + - 7;
-```
-
-Esses casos permitem verificar se o analisador é capaz de detectar expressões que não obedecem à gramática definida.
-
-### 9. Resumo dos testes
-
-| Categoria                        | Objetivo                                         |
-| -------------------------------- | ------------------------------------------------ |
-| Operações básicas                | Verificar `+`, `-`, `*` e `/`                    |
-| Números negativos                | Verificar operadores unários e valores negativos |
-| Parênteses                       | Verificar agrupamento de expressões              |
-| Precedência                      | Verificar a ordem de avaliação dos operadores    |
-| Módulo                           | Verificar o operador `%`                         |
-| Divisão por zero                 | Verificar tratamento de operação inválida        |
-| Caracteres inválidos             | Verificar erros léxicos                          |
-| Identificadores não reconhecidos | Verificar tokens não previstos                   |
-| Operadores inválidos             | Verificar símbolos não pertencentes à linguagem  |
-| Expressões inválidas             | Verificar erros sintáticos                       |
 # Licença
 
 Este projeto foi desenvolvido para a disciplina **Compiladores 1** da Universidade de Brasília (UnB).
