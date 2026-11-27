@@ -1,4 +1,4 @@
-# Compilador de C -> Assembly
+# Compilador de C -> Assembly RISC V
 
 Este documento descreve as especificações do subconjunto da linguagem C aceito pelo nosso compilador, cujo objetivo final é a tradução para código Assembly. 
 
@@ -65,7 +65,6 @@ Para manter a documentação principal enxuta, todos os detalhes de implementaç
 
 > 🔍 **[Acessar Documentação de Testes e Evidências](./docs/testes.md)**
 
-> 🌳 **[Ver exemplo da Árvore Sintática Abstrata (AST)](./docs/arvore-sintatica.md)**
 
 *(Abaixo, um guia de onde encontrar os arquivos de teste no repositório)*  
 ![Guia de Testes](./docs/img/guia_pastas.png)
@@ -94,7 +93,7 @@ A linguagem escolhida reconhece as seguintes categorias de tokens:
 
 ### 1.1. Palavras Reservadas (Keywords)
 As seguintes palavras são reservadas e não podem ser usadas como identificadores:
-* `int`, `char`, `bool`, `float`, `void`, `return`, `if`, `else`, `for`, `while`
+* `int`, `char`, `void`, `return`, `if`, `else`, `for`, `while`
 
 ### 1.2. Identificadores
 Nomes de variáveis e funções. 
@@ -157,6 +156,11 @@ int main() {
     return resultado;
 }
 ```
+### 3.2. Resultado esperado do fatorial
+[Saida_experada_1](./docs/img/saida_esperada_1.png)
+[Saida_experada_2](./docs/img/saida_esperada_2.png)
+[Saida_experada_3](./docs/img/saida_esperada_3.png)
+[Saida_experada_4](./docs/img/saida_esperada_4.png)
 
 ---
 
@@ -213,6 +217,20 @@ Execute o compilador redirecionando o arquivo como entrada:
 ```
 
 No MSYS2, use `./parser.exe < programa.c` caso o shell não encontre o executável sem a extensão `.exe`.
+
+Também é possível pedir ao Make para compilar o parser, se necessário, e executar um arquivo pelo alvo `execute`. A partir da pasta `src`, informe o caminho do programa na variável `PROGRAMA`:
+
+```bash
+make execute PROGRAMA=programa.c
+```
+
+Por exemplo, para compilar o exemplo que está na pasta `docs`:
+
+```bash
+make execute PROGRAMA=../docs/fatorial.c
+```
+
+O caminho é relativo à pasta em que o comando `make` é executado. Use o nome da variável sem os sinais `<` e `>`; esses sinais são usados pelo shell para redirecionamento.
 
 O compilador imprime a AST, a tabela de símbolos, o código intermediário de três endereços e, ao final, o Assembly RISC-V RV32IM. Para guardar toda essa saída em um arquivo:
 
