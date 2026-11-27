@@ -157,10 +157,10 @@ int main() {
 }
 ```
 ### 3.2. Resultado esperado do fatorial
-[Saida_experada_1](./docs/img/saida_esperada_1.png)
-[Saida_experada_2](./docs/img/saida_esperada_2.png)
-[Saida_experada_3](./docs/img/saida_esperada_3.png)
-[Saida_experada_4](./docs/img/saida_esperada_4.png)
+![Saida_experada_1](./docs/img/saida_esperada_1.png)
+![Saida_experada_2](./docs/img/saida_esperada_2.png)
+![Saida_experada_3](./docs/img/saida_esperada_3.png)
+![Saida_experada_4](./docs/img/saida_esperada_4.png)
 
 ---
 
