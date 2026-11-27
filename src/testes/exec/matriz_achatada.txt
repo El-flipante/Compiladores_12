@@ -1,0 +1,18 @@
+// Matriz 3x3 guardada em vetor (indice linha * 3 + coluna) e produto A * B.
+int main() {
+    int a[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int b[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int c[9];
+    int r;
+    for (int i = 0; i < 3; i = i + 1) {
+        for (int j = 0; j < 3; j = j + 1) {
+            c[i * 3 + j] = 0;
+            for (int k = 0; k < 3; k = k + 1) {
+                c[i * 3 + j] = c[i * 3 + j] + a[i * 3 + k] * b[k * 3 + j];
+            }
+        }
+    }
+    r = 0;
+    for (int i = 0; i < 9; i = i + 1) r = r * 3 + c[i];
+    return r;
+}

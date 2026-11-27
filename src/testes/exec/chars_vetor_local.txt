@@ -1,0 +1,17 @@
+// Vetor de char local (um byte por elemento) e escape em literais.
+// Os tamanhos 6 e 7 nao sao multiplos de 4: o int declarado depois precisa
+// continuar alinhado.
+int main() {
+    char s[6] = {'o', 'l', 'a', '\n', '\t', '\\'};
+    char t[7];
+    int r;
+    for (int i = 0; i < 6; i = i + 1) t[i] = s[5 - i];
+    r = 0;
+    if (t[0] == '\\') r = r + 1;
+    if (t[1] == '\t') r = r + 2;
+    if (t[2] == '\n') r = r + 4;
+    if (t[3] == 'a') r = r + 8;
+    if (t[5] == 'o') r = r + 16;
+    if (s[0] == 'o') r = r + 32;
+    return r;
+}

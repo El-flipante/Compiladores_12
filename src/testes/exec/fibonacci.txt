@@ -1,0 +1,24 @@
+// Duas chamadas recursivas na mesma expressao: o resultado da primeira precisa
+// sobreviver a segunda chamada.
+int fib(int n) {
+    if (n < 2) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+
+int fib_iterativo(int n) {
+    int a;
+    int b;
+    int t;
+    a = 0;
+    b = 1;
+    for (int i = 0; i < n; i = i + 1) {
+        t = a + b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
+
+int main() {
+    return fib(15) * 1000 + fib_iterativo(15) - 600;
+}

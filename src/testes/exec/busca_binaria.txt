@@ -1,0 +1,20 @@
+int dados[10] = {2, 3, 5, 8, 13, 21, 34, 55, 89, 144};
+
+int busca(int alvo) {
+    int baixo;
+    int alto;
+    int meio;
+    baixo = 0;
+    alto = 9;
+    while (baixo <= alto) {
+        meio = (baixo + alto) / 2;
+        if (dados[meio] == alvo) return meio;
+        if (dados[meio] < alvo) baixo = meio + 1;
+        else alto = meio - 1;
+    }
+    return -1;
+}
+
+int main() {
+    return busca(2) + busca(144) * 10 + busca(21) * 100 + busca(4) * 1000 + busca(90) * 10000;
+}

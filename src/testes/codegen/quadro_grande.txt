@@ -1,0 +1,7 @@
+int main() {
+    int v[600];
+    int x;
+    x = 3;
+    v[599] = x;
+    return v[599];
+}

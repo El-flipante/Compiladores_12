@@ -1,0 +1,11 @@
+char dobra(char c) {
+    return c + c;
+}
+
+int main() {
+    char s[3] = {'a', 'b'};
+    int v[2] = {7, 8};
+    s[2] = dobra(s[0]);
+    v[1] = v[0];
+    return v[1];
+}

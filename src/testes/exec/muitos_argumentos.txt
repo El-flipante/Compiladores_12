@@ -1,0 +1,25 @@
+// Mais de 8 argumentos: os primeiros vao em registradores (a0-a7), os demais na pilha.
+int pesos(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j) {
+    return a + b * 2 + c * 3 + d * 4 + e * 5 + f * 6 + g * 7 + h * 8 + i * 9 + j * 10;
+}
+
+int repassa(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k) {
+    return pesos(k, j, i, h, g, f, e, d, c, b) + a * 1000;
+}
+
+int quatro(int a, int b, int c, int d) {
+    return a * 1000 + b * 100 + c * 10 + d;
+}
+
+int dobro(int n) {
+    return n * 2;
+}
+
+int main() {
+    int r;
+    r = pesos(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    r = r + repassa(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11) * 3;
+    r = r + pesos(dobro(1), dobro(2), dobro(3), dobro(4), dobro(5), dobro(6), dobro(7), dobro(8), dobro(9), dobro(10));
+    r = r + quatro(1, dobro(2), 3, dobro(dobro(1)));
+    return r;
+}

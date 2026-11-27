@@ -25,7 +25,7 @@ void test_insert_and_lookup() {
     Symbol *dup = insert_symbol("x", TYPE_FLOAT, 0, 0, 0);
     assert(dup == NULL);
 
-    // Shadowing: inserção de x no escopo 1 com outro tipo
+    // Sombreamento: insercao de x no escopo 1 com outro tipo
     Symbol *shadow = insert_symbol("x", TYPE_FLOAT, 0, 0, 1);
     assert(shadow != NULL);
     assert(shadow->scope == 1);

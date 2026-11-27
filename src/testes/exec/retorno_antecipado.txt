@@ -1,0 +1,28 @@
+// return no meio de lacos e ifs, e funcao void que termina cedo.
+int global;
+
+int primeiro_multiplo(int k, int limite) {
+    for (int i = 1; i <= limite; i = i + 1) {
+        if (i % k == 0) return i;
+    }
+    return -1;
+}
+
+void marca(int n) {
+    if (n < 0) return;
+    global = global + n;
+    if (n > 100) return;
+    global = global + 1000;
+}
+
+void nada() {
+}
+
+int main() {
+    global = 0;
+    marca(-5);
+    marca(7);
+    marca(500);
+    nada();
+    return primeiro_multiplo(7, 100) * 100000 + primeiro_multiplo(7, 5) + global;
+}

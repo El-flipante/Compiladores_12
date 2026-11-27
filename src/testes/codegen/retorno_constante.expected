@@ -1,0 +1,25 @@
+=== CODIGO FINAL (ASSEMBLY RISC-V) ===
+# Assembly RISC-V (RV32IM, ABI ilp32) gerado a partir do codigo intermediario
+# Montar:  riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -nostdlib -static prog.s -o prog
+# Executar: qemu-riscv32 ./prog   (codigo de saida = valor retornado por main)
+
+    .text
+    .globl _start
+_start:
+    jal ra, main
+    li a7, 93
+    ecall
+
+    .globl main
+main:
+    addi sp, sp, -16
+    sw ra, 12(sp)
+    sw s0, 8(sp)
+    addi s0, sp, 16
+    li a0, 42
+.Lret_main:
+    lw ra, -4(s0)
+    mv sp, s0
+    lw s0, -8(sp)
+    ret
+======================================
