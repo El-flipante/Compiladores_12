@@ -196,7 +196,7 @@ O Makefile executa Bison e Flex para gerar `parser.tab.c`, `parser.tab.h` e `lex
 
 ## 2. Compilar um Programa de Entrada
 
-Continue executando os comandos na pasta `src`. Coloque o seu arquivo-fonte na pasta `coloque_seus_programas_aqui/`, na raiz do repositório. Salve o código como o exemplo abaixo `coloque_seus_programas_aqui/programa_soma.c`:
+Continue executando os comandos na pasta `src`. Coloque o seu arquivo-fonte na pasta `coloque_seus_programas_aqui/`, na raiz do repositório. Salve o seu código como o exemplo ao lado `coloque_seus_programas_aqui/programa_soma.c` Seu código deve estar semelhante ao formato da imagem abaixo:
 
 ```c
 int soma(int a, int b) {
