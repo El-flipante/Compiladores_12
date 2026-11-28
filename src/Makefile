@@ -50,15 +50,22 @@ test: test-symtab test-lexer test-ast-output test-complementares test-ir
 
 ifeq ($(strip $(PROGRAMA)),)
 execute:
-	@echo "Uso: make execute PROGRAMA=../programas/meu_programa.c"
+	@echo "Uso: make execute PROGRAMA=meu_programa.c"
 	@exit 2
 else
 execute: $(EXEC)
-	@if [ ! -f "$(PROGRAMA)" ]; then \
-		echo "Arquivo nao encontrado: $(PROGRAMA)" >&2; \
-		exit 2; \
-	fi
-	./$(EXEC) < "$(PROGRAMA)"
+	@programa="$(PROGRAMA)"; \
+	if [ ! -f "$$programa" ]; then \
+		nome=$$(basename "$$programa"); \
+		localizado=$$(find ../coloque_seus_programas_aqui -type f -name "$$nome" -print -quit 2>/dev/null); \
+		if [ -n "$$localizado" ]; then \
+			programa="$$localizado"; \
+		else \
+			echo "Arquivo nao encontrado: $(PROGRAMA) (buscado no caminho informado e em ../coloque_seus_programas_aqui)" >&2; \
+			exit 2; \
+		fi; \
+	fi; \
+	./$(EXEC) < "$$programa"
 endif
 
 clean:

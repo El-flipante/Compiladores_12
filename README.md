@@ -178,14 +178,14 @@ Antes de iniciar, instale as ferramentas abaixo:
 
 ## 1. Compilar o Compilador
 
-Se ainda não tiver o repositório, clone-o e entre na pasta do código-fonte:
+Se ainda não tiver o repositório na sua máquina, clone-o:
 
 ```bash
 git clone https://github.com/El-flipante/Compiladores_12
 cd Compiladores_12
 ```
 
-Se o repositório já estiver na sua máquina, entre na pasta `src`. Depois compile o projeto:
+Se o repositório já estiver clonado, abra o terminal na pasta raiz `Compiladores_12`. A partir dessa raiz, entre em `src` e compile:
 
 ```bash
 cd src
@@ -196,7 +196,7 @@ O Makefile executa Bison e Flex para gerar `parser.tab.c`, `parser.tab.h` e `lex
 
 ## 2. Compilar um Programa de Entrada
 
-O compilador lê o programa pela entrada padrão. Crie um arquivo, por exemplo `programa.c`, com código pertencente ao subconjunto da linguagem aceito pelo projeto:
+Continue executando os comandos na pasta `src`. Coloque o arquivo-fonte do usuário na pasta `coloque_seus_programas_aqui/`, na raiz do repositório. Por exemplo, salve o código abaixo como `coloque_seus_programas_aqui/programa_soma.c`:
 
 ```c
 int soma(int a, int b) {
@@ -210,32 +210,28 @@ int main() {
 }
 ```
 
-Execute o compilador redirecionando o arquivo como entrada:
+Na pasta `src`, execute o alvo `execute` informando o nome do arquivo. O Makefile procura esse nome dentro de `coloque_seus_programas_aqui/`:
 
 ```bash
-./parser < programa.c
+make execute PROGRAMA=programa_soma.c
 ```
 
-No MSYS2, use `./parser.exe < programa.c` caso o shell não encontre o executável sem a extensão `.exe`.
-
-Também é possível pedir ao Make para compilar o parser, se necessário, e executar um arquivo pelo alvo `execute`. A partir da pasta `src`, informe o caminho do programa na variável `PROGRAMA`:
+Também é possível passar um caminho explícito, relativo à pasta `src`:
 
 ```bash
-make execute PROGRAMA=programa.c
+make execute PROGRAMA=../coloque_seus_programas_aqui/programa_soma.c
 ```
 
-Por exemplo, para compilar o exemplo que está na pasta `docs`:
+O alvo compila o parser se necessário e envia o arquivo selecionado como entrada. Para executá-lo sem o Make, use redirecionamento; em MSYS2, acrescente `.exe` se o shell precisar da extensão:
 
 ```bash
-make execute PROGRAMA=../docs/fatorial.c
+./parser < ../coloque_seus_programas_aqui/programa_soma.c
 ```
-
-O caminho é relativo à pasta em que o comando `make` é executado. Use o nome da variável sem os sinais `<` e `>`; esses sinais são usados pelo shell para redirecionamento.
 
 O compilador imprime a AST, a tabela de símbolos, o código intermediário de três endereços e, ao final, o Assembly RISC-V RV32IM. Para guardar toda essa saída em um arquivo:
 
 ```bash
-./parser < programa.c > saida_compilador.txt
+make execute PROGRAMA=programa_soma.c > saida_compilador.txt
 ```
 
 O Assembly final estará no último bloco da saída. Se houver erros léxicos, sintáticos ou semânticos, o compilador mostra os diagnósticos e não gera o código intermediário nem o Assembly.
@@ -271,6 +267,7 @@ Compiladores_12/
 ├── README.md                  # Visão geral, linguagem e instruções de uso
 ├── docs/                      # Documentação, testes e evidências do projeto
 ├── professor/                 # Materiais e referências da disciplina
+├── coloque_seus_programas_aqui/ # Programas de entrada criados pelo usuário
 └── src/
     ├── Makefile               # Compilação e execução dos testes
     ├── lexer.l                # Regras do analisador léxico (Flex)
